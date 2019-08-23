@@ -71,6 +71,7 @@ export const newSchema: ISchema = {
                                 },
                                 submit: {
                                     displayName: 'Submit',
+                                    size: 10,
                                 }
                             }
                         }

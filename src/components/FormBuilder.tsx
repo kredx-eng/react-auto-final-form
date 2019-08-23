@@ -137,6 +137,7 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     fieldEvaluator = (fields: Array<IFields> | Fields, formProps: any, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
+        //TODO: Add functionality for evaluating Field metadata as a function or at fieldRenderer
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
                 let fieldArray = [];
@@ -273,6 +274,7 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     fieldRenderer = (field: any, index: number, formProps: any): any => {
+        //TODO: Add functionality for document upload
         if (!field.name) {
             field.name = `defaultName${index}`
         }
@@ -295,7 +297,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Field
                     name={field.name}
                     component={this.props.componentFactory[field.component]}
-                    key={`Field_${index}`}
+                    key={`Field_name_${index}`}
                     displayName={field.displayName}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
                     size={field.size ? field.size : 10}
@@ -311,7 +313,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Field
                     name={field.name}
                     component={field.component}
-                    key={`Field_${index}`}
+                    key={`Field_name_${index}`}
                     displayName={field.displayName}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
                     size={field.size ? field.size : 10}
@@ -326,7 +328,7 @@ class FormBuilder extends React.Component<IProps, any> {
             return (
                 <Field
                     name={field.name}
-                    key={`Field_${index}`}
+                    key={`Field_name_${index}`}
                     displayName={field.displayName}
                     component={TextInputField}
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
@@ -343,7 +345,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     displayName={field.displayName}
                     component={Button}
                     enum={field.enum}
-                    size={field.size ? field.size : 10}
+                    size={field.size ? field.size : 5}
                 />
             )
         } else if (field.type === 'entity') {
@@ -370,13 +372,14 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     handleArray = (field: any, formProps: any) => {
+        //TODO: How to best handle this
         const {entities} = this.props.schema;
         entities.map((entity) => {
             if (entity.name === field.entityName) {
                 this.isArray = true;
                 this.previousEntity = currentEntity;
-                this.entityEvaluator(entity, formProps);
-            }
+                return this.entityEvaluator(entity, formProps);
+            } else return null
         });
     }
 

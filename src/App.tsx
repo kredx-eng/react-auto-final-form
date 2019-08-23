@@ -10,10 +10,10 @@ import Button from "./components/FormButton";
 import {arraySchema} from "./Schema3";
 import MainWindow from "./demo/MainWindow";
 
-const COMPONENT_FACTORY = {
+export const COMPONENT_FACTORY = {
     string: TextInputField,
-    array: SelectInputField,
     button: Button,
+    select: SelectInputField,
 };
 
 class App extends React.Component<any, any> {

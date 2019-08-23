@@ -13,8 +13,9 @@ export const newSchema: ISchema = {
                     type: 'string',
                 },
                 gender: {
-                    type: 'array',
-                    enum: ['','Male', 'Female']
+                    type: 'string',
+                    enum: ['','Male', 'Female'],
+                    component: 'select'
                 },
                 random:{
                     type: 'entity',

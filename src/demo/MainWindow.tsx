@@ -13,6 +13,7 @@ import 'codemirror/theme/material.css';
 import 'codemirror/mode/htmlmixed/htmlmixed';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
+import {COMPONENT_FACTORY} from "../App";
 
 const codeMirrorOptions = {
     mode: 'javascript',
@@ -106,11 +107,11 @@ class MainWindow extends React.Component <any, any> {
     renderFormBuilder = () => {
         if (_.isEmpty(this.state.currentSchema)) {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={DEMO_SCHEMAS['Simple'].value}/>
+                <FormBuilder onSubmit={this.handleSubmit} schema={DEMO_SCHEMAS['Simple'].value} componentFactory={COMPONENT_FACTORY}/>
             )
         } else {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={this.state.currentSchema}/>
+                <FormBuilder onSubmit={this.handleSubmit} schema={this.state.currentSchema} componentFactory={COMPONENT_FACTORY}/>
             )
         }
     };

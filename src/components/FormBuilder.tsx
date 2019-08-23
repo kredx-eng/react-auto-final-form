@@ -288,13 +288,13 @@ class FormBuilder extends React.Component<IProps, any> {
             }
         };
 
-        if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.type)) {
+        if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
             assignFormData();
             this.isArray = false;
             return (
                 <Field
                     name={field.name}
-                    component={this.props.componentFactory[field.type]}
+                    component={this.props.componentFactory[field.component]}
                     key={`Field_${index}`}
                     displayName={field.displayName}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}

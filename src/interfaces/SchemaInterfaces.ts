@@ -63,3 +63,5 @@ export type LayoutFields = {
 export type ComponentFactory = {
     [name: string]: any
 }
+
+export type FieldFn = (data: any, parameter?: any) => any;

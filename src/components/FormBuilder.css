@@ -1,0 +1,29 @@
+.verticalLayout {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.horizontalLayout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.verticalGroup {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.horizontalGroup {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.container {
+    display: flex;
+    margin: 5px;
+    flex-wrap: wrap;
+}

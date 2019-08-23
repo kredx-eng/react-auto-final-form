@@ -1,0 +1,34 @@
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
+import {newSchema} from "./Schema2";
+import FormBuilder from "./components/FormBuilder";
+import {Form, Field} from 'react-final-form'
+import TextInputField from "./components/TextInputField";
+import SelectInputField from "./components/SelectInputField";
+import Button from "./components/FormButton";
+import {arraySchema} from "./Schema3";
+import MainWindow from "./demo/MainWindow";
+
+const COMPONENT_FACTORY = {
+    string: TextInputField,
+    array: SelectInputField,
+    button: Button,
+};
+
+class App extends React.Component<any, any> {
+
+    render() {
+        return (
+            <MainWindow/>
+            //<FormBuilder onSubmit={this.handleSubmit} schema={newSchema} componentFactory={COMPONENT_FACTORY}/>
+        );
+    }
+
+    handleSubmit = (formData: any): void => {
+        console.log(formData, 'called');
+    }
+
+}
+
+export default App;

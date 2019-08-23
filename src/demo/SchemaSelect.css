@@ -1,0 +1,17 @@
+#selectInput {
+    width: 20vw;
+    height: 5vh;
+    background-color: white;
+    color: #4CAF50;
+    margin-top: 10px;
+    border-color: #4CAF50;
+    border-width: 1px;
+    font-size: 17px;
+    margin-bottom: 10px;
+}
+
+.inputField {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}

@@ -1,0 +1,34 @@
+.field {
+    display: flex;
+    justify-content: space-around;
+    height: 5vh;
+    margin: 10px;
+    align-items: center;
+    max-width: 80vh ;
+}
+
+label {
+    flex: 2;
+}
+
+.textInput {
+    border-radius: 10px;
+    border-width: 2px;
+    flex: 8;
+    border-color: black;
+    align-items: center;
+    text-align: center;
+    height: 3vh;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+p {
+    color: red;
+    font-size: 10px;
+    margin: 5px;
+}

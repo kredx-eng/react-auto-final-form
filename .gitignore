@@ -3,7 +3,12 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.js
+.pnp.
+
+# IDE files
+.idea/
+.vscode/
+lib/
 
 # testing
 /coverage

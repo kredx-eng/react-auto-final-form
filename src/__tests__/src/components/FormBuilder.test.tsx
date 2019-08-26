@@ -2,9 +2,9 @@ import React from "react";
 import {mount, render} from 'enzyme';
 import FormBuilder from "../../../components/FormBuilder";
 import {newSchema} from "../../../Schema2";
-import TextInputField from "../../../components/TextInputField";
-import SelectInputField from "../../../components/SelectInputField";
-import Button from "../../../components/FormButton";
+import TextInputField from "../../../components/input/TextInputField";
+import SelectInputField from "../../../components/input/SelectInputField";
+import Button from "../../../components/input/FormButton";
 
 const COMPONENT_FACTORY = {
     string: TextInputField,

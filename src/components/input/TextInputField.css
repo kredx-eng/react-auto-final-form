@@ -5,7 +5,7 @@
     margin: 10px;
     align-items: center;
     max-width: 80vh ;
-    min-width: 30px;
+    min-width: 20vw;
 }
 
 label {
@@ -22,6 +22,7 @@ label {
     text-align: center;
     height: 3vh;
     max-width: 50vw;
+    min-width: 10vw;
 }
 
 input[type=number]::-webkit-inner-spin-button,

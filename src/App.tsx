@@ -4,9 +4,9 @@ import './App.css';
 import {newSchema} from "./Schema2";
 import FormBuilder from "./components/FormBuilder";
 import {Form, Field} from 'react-final-form'
-import TextInputField from "./components/TextInputField";
-import SelectInputField from "./components/SelectInputField";
-import Button from "./components/FormButton";
+import TextInputField from "./components/input/TextInputField";
+import SelectInputField from "./components/input/SelectInputField";
+import Button from "./components/input/FormButton";
 import {arraySchema} from "./Schema3";
 import MainWindow from "./demo/MainWindow";
 

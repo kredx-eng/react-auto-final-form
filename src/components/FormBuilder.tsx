@@ -12,10 +12,11 @@ import {
     LayoutFields
 } from "../interfaces/SchemaInterfaces";
 import {Field, Form} from 'react-final-form';
-import TextInputField from "./TextInputField";
+import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
-import Button from "./FormButton";
+import Button from "./input/FormButton";
+import {FormHelper} from "../utils/FormHelper";
 
 interface IProps {
     onSubmit: (value: any) => void;
@@ -44,7 +45,7 @@ class FormBuilder extends React.Component<IProps, any> {
     handleSubmit = (submitData: any) => {
         this.props.onSubmit(formData);
     };
-
+    //TODO: Figure out a way to Handle form re-renders much better(Priority)
     render = () => {
         const {entities} = this.props.schema;
         return (
@@ -54,6 +55,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     initialValues={{gender: '', email: ''}}
                     validateOnBlur={true}
                     render={(formProps) => {
+                        FormHelper.updateFormState(formProps);
                         this.formData = formData;
                         return (
                             <form onSubmit={formProps.handleSubmit}>
@@ -137,7 +139,6 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     fieldEvaluator = (fields: Array<IFields> | Fields, formProps: any, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
-        //TODO: Add functionality for evaluating Field metadata as a function or at fieldRenderer
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
                 let fieldArray = [];
@@ -180,8 +181,10 @@ class FormBuilder extends React.Component<IProps, any> {
                 if (Array.isArray(fields)) {
                     return fields.map((field, index) => {
                         if (field.name) {
+                            // @ts-ignore
                             if (layoutFields.hasOwnProperty(field.name)) {
                                 const mergedField = {
+                                    // @ts-ignore
                                     ...layoutFields[field.name],
                                     ...field
                                 };
@@ -256,6 +259,7 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, formProps: any, layoutName?: string) => {
+        orientation = FormHelper.metaDataEvaluator(orientation);
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
@@ -282,8 +286,8 @@ class FormBuilder extends React.Component<IProps, any> {
         const assignFormData = () => {
             if (formProps.values.hasOwnProperty(field.name)) {
                 let newObj: { [s: string]: any } = {};
-                if(this.isArray) {
-                    
+                if (this.isArray) {
+
                 }
                 newObj[field.name] = formProps.values[field.name];
                 Object.assign(formData[currentEntity], newObj);
@@ -298,9 +302,9 @@ class FormBuilder extends React.Component<IProps, any> {
                     name={field.name}
                     component={this.props.componentFactory[field.component]}
                     key={`Field_name_${index}`}
-                    displayName={field.displayName}
+                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? field.size : 10}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                     enum={field.enum ? field.enum : []}
                 />
             )
@@ -314,9 +318,9 @@ class FormBuilder extends React.Component<IProps, any> {
                     name={field.name}
                     component={field.component}
                     key={`Field_name_${index}`}
-                    displayName={field.displayName}
+                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? field.size : 10}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                     enum={field.enum ? field.enum : []}
                 />
             )
@@ -329,11 +333,11 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Field
                     name={field.name}
                     key={`Field_name_${index}`}
-                    displayName={field.displayName}
+                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={TextInputField}
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
                     type={field.type}
-                    size={field.size ? field.size : 10}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                 />
             )
         } else if (field.type === 'button') {
@@ -342,10 +346,10 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Field
                     name={field.name}
                     key={`Field_${field.name}_${index}`}
-                    displayName={field.displayName}
+                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={Button}
                     enum={field.enum}
-                    size={field.size ? field.size : 5}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 5}
                 />
             )
         } else if (field.type === 'entity') {

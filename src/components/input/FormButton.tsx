@@ -1,5 +1,5 @@
 import React from 'react';
-import {IFields} from "../interfaces/SchemaInterfaces";
+import {IFields} from "../../interfaces/SchemaInterfaces";
 import {FieldRenderProps} from "react-final-form";
 import './FormButton.css'
 

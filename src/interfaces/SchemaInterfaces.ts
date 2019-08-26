@@ -1,15 +1,16 @@
 import {Validators} from "../utils/Validators";
+import {FormRenderProps} from "react-final-form";
 
 export interface IFields {
-    name?: string;
-    type: 'array' | 'entity' | 'string' | 'button' | 'number';
+    name?: string ;
+    type: 'array' | 'entity' | 'string' | 'button' | 'number' | FieldFn | 'document';
     component?: any;
     validators?: Array< Validators | string > | Validators | string;
-    enum?: Array<any>;
+    enum?: Array<any> | FieldFn;
     arrayType?: string;
     layoutName?: string;
     entityType?: 'array' | 'string' | 'button' | 'number';
-    entityName?: string;
+    entityName?: string | FieldFn;
     format?: string;
 }
 
@@ -21,16 +22,16 @@ export interface IEntities {
 
 export interface ILayout {
     groups?: Group;
-    orientation?: 'horizontal' | 'vertical';
+    orientation?: 'horizontal' | 'vertical' | FieldFn;
     fields?: LayoutFields | Array<ILayoutFields>;
     name?: string;
 }
 
 export interface ILayoutFields {
-    displayName?: string;
-    size?: number;
-    hidden?: boolean;
-    placeholder?: string;
+    displayName?: string | FieldFn;
+    size?: number | FieldFn;
+    hidden?: boolean | FieldFn;
+    placeholder?: string | FieldFn;
     name?: string;
 }
 
@@ -64,4 +65,4 @@ export type ComponentFactory = {
     [name: string]: any
 }
 
-export type FieldFn = (data: any, parameter?: any) => any;
+export type FieldFn = (formState: FormRenderProps, parameter?: any) => any;

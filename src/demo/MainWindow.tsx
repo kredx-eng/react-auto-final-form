@@ -107,11 +107,11 @@ class MainWindow extends React.Component <any, any> {
     renderFormBuilder = () => {
         if (_.isEmpty(this.state.currentSchema)) {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={DEMO_SCHEMAS['Simple'].value} componentFactory={COMPONENT_FACTORY}/>
+                <FormBuilder onSubmit={this.handleSubmit} schema={DEMO_SCHEMAS['Simple'].value} componentFactory={COMPONENT_FACTORY} entityName={'first'}/>
             )
         } else {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={this.state.currentSchema} componentFactory={COMPONENT_FACTORY}/>
+                <FormBuilder onSubmit={this.handleSubmit} schema={this.state.currentSchema} componentFactory={COMPONENT_FACTORY} entityName={'first'}/>
             )
         }
     };

@@ -53,6 +53,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Form
                     onSubmit={this.handleSubmit}
                     initialValues={{gender: '', email: ''}}
+                    subscription={{values: true,submitting: true}}
                     validateOnBlur={true}
                     render={(formProps) => {
                         FormHelper.updateFormState(formProps);
@@ -283,91 +284,71 @@ class FormBuilder extends React.Component<IProps, any> {
             field.name = `defaultName${index}`
         }
 
-        const assignFormData = () => {
-            if (formProps.values.hasOwnProperty(field.name)) {
-                let newObj: { [s: string]: any } = {};
-                if (this.isArray) {
-
-                }
-                newObj[field.name] = formProps.values[field.name];
-                Object.assign(formData[currentEntity], newObj);
-            }
-        };
-
         if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
-            assignFormData();
             this.isArray = false;
             return (
                 <Field
-                    name={field.name}
+                    name={`${currentEntity}.${field.name}`}
                     component={this.props.componentFactory[field.component]}
-                    key={`Field_name_${index}`}
+                    key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                     enum={field.enum ? field.enum : []}
+                    subscription={{value: true, touched: true, error: true}}
                 />
             )
         } else if (field.component && field.name) {
             if (!field.entityName) {
-                assignFormData();
                 this.isArray = false;
             }
             return (
                 <Field
-                    name={field.name}
+                    name={`${currentEntity}.${field.name}`}
                     component={field.component}
-                    key={`Field_name_${index}`}
+                    key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                     enum={field.enum ? field.enum : []}
+                    subscription={{value: true, touched: true, error: true}}
                 />
             )
         } else if (field.type === 'string' || field.type === 'number') {
             if (!field.entityName) {
-                assignFormData();
                 this.isArray = false;
             }
             return (
                 <Field
-                    name={field.name}
-                    key={`Field_name_${index}`}
+                    name={`${currentEntity}.${field.name}`}
+                    key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={TextInputField}
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
                     type={field.type}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
+                    subscription={{value: true, touched: true, error: true}}
                 />
             )
         } else if (field.type === 'button') {
             this.isArray = false;
             return (
                 <Field
-                    name={field.name}
+                    name={`${currentEntity}.${field.name}`}
                     key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={Button}
                     enum={field.enum}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 5}
+                    subscription={{value: true, touched: true, error: true}}
                 />
             )
         } else if (field.type === 'entity') {
-            let newObj: { [s: string]: any } = {};
+
             if (field.entityType) {
                 field.type = field.entityType;
             } else {
                 field.type = 'string';
-            }
-            if (formData[currentEntity].hasOwnProperty(field.entityName)) {
-                newObj[field.name] = formProps.values[field.name];
-                Object.assign(formData[currentEntity][field.entityName], newObj)
-            } else {
-                newObj[field.entityName] = {};
-                Object.assign(formData[currentEntity], newObj);
-                newObj = {};
-                newObj[field.name] = formProps.values[field.name];
-                Object.assign(formData[currentEntity][field.entityName], newObj);
             }
             return this.fieldRenderer(field, index, formProps)
         } else if (field.type === 'array') {

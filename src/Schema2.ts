@@ -32,9 +32,6 @@ export const newSchema: ISchema = {
                     entityName: 'Random',
                     entityType: 'string',
                 },
-                submit: {
-                    type: "button",
-                }
             },
             layouts: [
                 {
@@ -69,10 +66,6 @@ export const newSchema: ISchema = {
                                     displayName: 'Random1',
                                     size: 3,
                                 },
-                                submit: {
-                                    displayName: 'Submit',
-                                    size: 10,
-                                }
                             }
                         }
                     }

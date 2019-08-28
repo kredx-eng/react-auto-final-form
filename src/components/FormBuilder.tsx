@@ -9,9 +9,10 @@ import {
     ILayoutFields,
     ISchema,
     Layout,
-    LayoutFields, SimpleObj
+    LayoutFields,
+    SimpleObj
 } from "../interfaces/SchemaInterfaces";
-import {Field, Form, FormProps} from 'react-final-form';
+import {Field, Form, FormProps, FormSpy} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
@@ -27,9 +28,11 @@ interface IProps {
     entityName: string;
     layoutName?: string;
     initialValues?: SimpleObj;
+    subscription?: { [formStateName: string]: boolean }
 }
 
-let formData: { [s: string]: any } = {};
+
+let renderCount = 0;
 
 class FormBuilder extends React.Component<IProps, any> {
     formData: any;
@@ -45,7 +48,6 @@ class FormBuilder extends React.Component<IProps, any> {
         this.state = {
             formData: {},
         };
-        this.formData = formData;
         this.previousEntity = '';
         this.isArray = false;
         this.currentEntity = {};
@@ -54,56 +56,85 @@ class FormBuilder extends React.Component<IProps, any> {
     }
 
     handleSubmit = (submitData: any) => {
-        this.props.onSubmit(formData);
+        this.props.onSubmit(submitData);
     };
 
     checkSchema = () => {
         let isPresent = false;
-        for(let entity of this.props.schema.entities) {
-            if(entity.name === this.props.entityName) {
+        for (let entity of this.props.schema.entities) {
+            if (entity.name === this.props.entityName) {
                 isPresent = true;
             }
         }
-        if(!isPresent) {
-            const e = new Error("The given schema doesn't contain any entity with the given entityName");
-            console.error(e);
+        if (!isPresent) {
+            throw Error("The given schema doesn't contain any entity with the given entityName");
         }
     };
 
-    searchEntity = (entityName: string) => {
-
-    };
 
     //TODO: Figure out a way to Handle form re-renders much better(Priority)
     render = () => {
-        const {entities} = this.props.schema;
-        this.checkSchema();
-        return (
-            <div className={'container'}>
-                <Form
-                    onSubmit={this.handleSubmit}
-                    initialValues={this.props.initialValues ? this.props.initialValues : undefined}
-                    subscription={{values: true,submitting: true}}
-                    validateOnBlur={true}
-                    mutators={{...arrayMutators}}
-                    render={(formProps) => {
-                        FormHelper.updateFormState(formProps);
-                        this.formProps = formProps;
-                        return (
-                            <form onSubmit={formProps.handleSubmit}>
-                                {entities.map((entity: IEntities) => {
-                                    if(entity.name === this.props.entityName){
-                                        return (this.entityEvaluator(entity,false,false))
-                                    } else {
-                                        return undefined;
-                                    }
-                                })}
-                            </form>
-                        );
-                    }}
-                />
-            </div>
-        )
+        try {
+            renderCount+=1;
+            const {entities} = this.props.schema;
+            this.checkSchema();
+            console.log(renderCount,'count')
+            return (
+                <div className={'container'}>
+                    <Form
+                        onSubmit={this.handleSubmit}
+                        initialValues={this.props.initialValues ? this.props.initialValues : undefined}
+                        subscription={this.props.subscription ? this.props.subscription : undefined}
+                        validateOnBlur={true}
+                        mutators={{...arrayMutators}}
+                        render={(formProps) => {
+                            FormHelper.updateFormState(formProps);
+                            this.formProps = formProps;
+                            if (this.props.subscription && !this.props.subscription.values) {
+                                console.log('spy')
+                                return (
+                                    <div>
+                                        <FormSpy render={
+                                            (formSpyProps: any) => {
+                                                this.formProps = formSpyProps;
+                                                FormHelper.updateFormState(formSpyProps);
+                                                return (<p></p>)
+                                            }
+                                        }/>
+                                        <form onSubmit={formProps.handleSubmit}>
+                                            {entities.map((entity: IEntities) => {
+                                                if (entity.name === this.props.entityName) {
+                                                    return (this.entityEvaluator(entity, false, false))
+                                                } else {
+                                                    return undefined;
+                                                }
+                                            })}
+                                            <button type={"submit"}>Submit</button>
+                                        </form>
+                                    </div>
+                                )
+
+                            } else {
+                                return (
+                                    <form onSubmit={formProps.handleSubmit}>
+                                        {entities.map((entity: IEntities) => {
+                                            if (entity.name === this.props.entityName) {
+                                                return (this.entityEvaluator(entity, false, false))
+                                            } else {
+                                                return undefined;
+                                            }
+                                        })}
+                                    </form>
+                                );
+                            }
+                        }}
+                    />
+                </div>
+            )
+        } catch (e) {
+            console.error(e);
+            return (<h1>Oops! Seems like there was an Error, please check the provided Schema</h1>)
+        }
     };
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
@@ -310,18 +341,14 @@ class FormBuilder extends React.Component<IProps, any> {
     fieldRenderer = (field: any, index: number): any => {
         let fieldName = '';
         //TODO: Add functionality for document upload
-        console.log(field.name, this.isArray, this.currentArrayName, index);
 
-        if(this.currentEntity!=={} && this.nested) {
-            if(index === this.currentEntity.fields.length - 1) {
+        if (this.currentEntity !== {} && this.nested) {
+            if (index === this.currentEntity.fields.length - 1) {
                 this.nested = false;
             }
             fieldName = `${this.currentEntity.name}.${field.name}`
-        } else if(this.currentArrayName && this.isArray) {
+        } else if (this.currentArrayName && this.isArray) {
             fieldName = `${this.currentArrayName}.${field.name}`;
-            // if(index === this.currentEntity.fields.length - 1) {
-            //     this.isArray = false;
-            // }
         } else {
             fieldName = field.name;
         }
@@ -378,53 +405,63 @@ class FormBuilder extends React.Component<IProps, any> {
                 />
             )
         } else if (field.type === 'entity') {
+            if (!field.entityName) {
+                throw Error('There should be an entityName for schema for a field of type entity');
+            }
             let isPresent = false;
-            for(let entity of this.props.schema.entities) {
-                if(entity.name === field.entityName) {
+            for (let entity of this.props.schema.entities) {
+                if (entity.name === field.entityName) {
                     this.currentEntity = entity;
                     isPresent = true;
                     return (
                         <label>
                             {field.displayName}
-                            {this.entityEvaluator(entity,true, false)}
+                            {this.entityEvaluator(entity, true, false)}
                         </label>
                     );
                 }
             }
-            if(!isPresent) {
-                const e = new Error("The given entityName of the field doesn't match with the entities in the schema");
-                console.error(e);
+            if (!isPresent) {
+                throw Error("The given entityName of the field doesn't match with the entities in the schema");
             }
         } else if (field.type === 'array') {
-            //TODO: How to best handle this
-            return(
+            if (!field.arrayType) {
+                throw Error('There should be an arrayType for a field of type array')
+            } else if (!field.entityName) {
+                throw Error('There should be an entityName for schema for a field of type array');
+            } else if (field.arrayType !== 'entity') {
+                throw Error('Currently only arrayType of entity is supported')
+            }
+            return (
                 <div className={'array'}>
                     <label>{field.displayName}</label>
-                    <button type={'button'} onClick={() => this.formProps.form.mutators.push(field.name,undefined)}>Add+</button>
+                    <button type={'button'}
+                            onClick={() => this.formProps.form.mutators.push(field.name, undefined)}
+                    >
+                        {field.addText ? field.addText : 'Add +'}
+                    </button>
                     <FieldArray
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
                             return fieldArrayProps.fields.map((name: any, index: number) => {
-                                console.log('name', name);
-                                return(this.handleArray(fieldArrayProps, field.entityName, name));
+                                return (this.handleArray(fieldArrayProps, field.entityName, name));
                             })
                         }}
                     />
                 </div>
-                )
+            )
         }
     };
 
     handleArray = (fieldArrayProps: any, entityName: string, arrayName: string) => {
-        for(let entity of this.props.schema.entities) {
-            if(entity.name === entityName) {
+        for (let entity of this.props.schema.entities) {
+            if (entity.name === entityName) {
                 this.currentEntity = entity;
             }
         }
-        return(this.entityEvaluator(this.currentEntity, false, true, arrayName));
+        return (this.entityEvaluator(this.currentEntity, false, true, arrayName));
     }
 
 }
 
 export default FormBuilder;
-

@@ -3,15 +3,15 @@ import {FormRenderProps} from "react-final-form";
 
 export interface IFields extends ILayoutFields{
     name?: string ;
-    type: 'array' | 'entity' | 'string' | 'button' | 'number' | FieldFn | 'document';
+    type: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document';
     component?: any;
     validators?: Array< Validators | string > | Validators | string;
     enum?: Array<any> | FieldFn;
-    arrayType?: string;
+    arrayType?: 'entity';
     layoutName?: string;
-    entityType?: 'array' | 'string' | 'button' | 'number';
     entityName?: string | FieldFn;
     format?: string;
+    addText?: string;
 }
 
 export interface IEntities {

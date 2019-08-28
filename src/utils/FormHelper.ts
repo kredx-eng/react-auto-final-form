@@ -9,7 +9,7 @@ let renderCount: number = 0;
 const _updateFormState = (formProps: any) => {
     _formState = formProps;
     renderCount += 1;
-    console.log(renderCount,_formState, 'OKAY')
+    // console.log(renderCount,_formState, 'OKAY')
 };
 
 const _metadataEvaluator = (value: any) => {

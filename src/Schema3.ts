@@ -27,7 +27,7 @@ export const arraySchema: ISchema = {
                     arrayType: "entity",
                     entityName: "phone",
                     displayName: "Custom add text",
-                    // addText: 'Add new phone'
+                    addText: 'Add new phone'
                 }
             ]
         },

@@ -15,10 +15,6 @@ export const DEMO_SCHEMAS: {[name: string]: any} = {
                             name: 'firstName',
                             type: 'string',
                         },
-                        {
-                            name: 'submit',
-                            type: 'button',
-                        }
                     ],
                     layouts: {
                         basic: {
@@ -32,9 +28,6 @@ export const DEMO_SCHEMAS: {[name: string]: any} = {
                                     displayName: 'First Name',
                                     size: 7,
                                 },
-                                submit: {
-                                    displayName: 'Submit',
-                                }
                             }
                         }
                     }

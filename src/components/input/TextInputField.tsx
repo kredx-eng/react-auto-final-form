@@ -22,6 +22,7 @@ const TextInputField = (props: any) => {
                 onBlur={input.onBlur}
                 onFocus={input.onFocus}
                 className={'textInput'}
+                value={input.value}
             />
             {meta.error && meta.touched &&
             <p>

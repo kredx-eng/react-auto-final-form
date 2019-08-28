@@ -1,7 +1,7 @@
 import {Validators} from "../utils/Validators";
 import {FormRenderProps} from "react-final-form";
 
-export interface IFields {
+export interface IFields extends ILayoutFields{
     name?: string ;
     type: 'array' | 'entity' | 'string' | 'button' | 'number' | FieldFn | 'document';
     component?: any;
@@ -66,3 +66,7 @@ export type ComponentFactory = {
 }
 
 export type FieldFn = (formState: FormRenderProps, parameter?: any) => any;
+
+export type SimpleObj = {
+    [name: string]: any
+}

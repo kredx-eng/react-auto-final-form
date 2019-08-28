@@ -9,7 +9,7 @@ import {
     ILayoutFields,
     ISchema,
     Layout,
-    LayoutFields
+    LayoutFields, SimpleObj
 } from "../interfaces/SchemaInterfaces";
 import {Field, Form, FormProps} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
@@ -17,6 +17,8 @@ import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
 import Button from "./input/FormButton";
 import {FormHelper} from "../utils/FormHelper";
+import {FieldArray} from 'react-final-form-arrays';
+import arrayMutators from 'final-form-arrays'
 
 interface IProps {
     onSubmit: (value: any) => void;
@@ -24,6 +26,7 @@ interface IProps {
     componentFactory?: ComponentFactory;
     entityName: string;
     layoutName?: string;
+    initialValues?: SimpleObj;
 }
 
 let formData: { [s: string]: any } = {};
@@ -34,7 +37,8 @@ class FormBuilder extends React.Component<IProps, any> {
     isArray: boolean;
     currentEntity: any;
     nested: boolean;
-    formProps: Object | FormProps;
+    formProps: any | FormProps;
+    currentArrayName: string | undefined;
 
     constructor(props: IProps) {
         super(props);
@@ -66,6 +70,10 @@ class FormBuilder extends React.Component<IProps, any> {
         }
     };
 
+    searchEntity = (entityName: string) => {
+
+    };
+
     //TODO: Figure out a way to Handle form re-renders much better(Priority)
     render = () => {
         const {entities} = this.props.schema;
@@ -74,9 +82,10 @@ class FormBuilder extends React.Component<IProps, any> {
             <div className={'container'}>
                 <Form
                     onSubmit={this.handleSubmit}
-                    initialValues={{gender: '', email: ''}}
+                    initialValues={this.props.initialValues ? this.props.initialValues : undefined}
                     subscription={{values: true,submitting: true}}
                     validateOnBlur={true}
+                    mutators={{...arrayMutators}}
                     render={(formProps) => {
                         FormHelper.updateFormState(formProps);
                         this.formProps = formProps;
@@ -84,7 +93,7 @@ class FormBuilder extends React.Component<IProps, any> {
                             <form onSubmit={formProps.handleSubmit}>
                                 {entities.map((entity: IEntities) => {
                                     if(entity.name === this.props.entityName){
-                                        return (this.entityEvaluator(entity))
+                                        return (this.entityEvaluator(entity,false,false))
                                     } else {
                                         return undefined;
                                     }
@@ -98,8 +107,10 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
-    entityEvaluator = (entity: IEntities, nested?: boolean) => {
-        this.nested = !!nested;
+    entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
+        this.nested = nested;
+        this.isArray = isArray;
+        this.currentArrayName = arrayName;
         if (entity.layouts) {
             const {fields, layouts} = entity;
             if (Array.isArray(layouts)) {
@@ -299,18 +310,23 @@ class FormBuilder extends React.Component<IProps, any> {
     fieldRenderer = (field: any, index: number): any => {
         let fieldName = '';
         //TODO: Add functionality for document upload
+        console.log(field.name, this.isArray, this.currentArrayName, index);
 
         if(this.currentEntity!=={} && this.nested) {
             if(index === this.currentEntity.fields.length - 1) {
                 this.nested = false;
             }
             fieldName = `${this.currentEntity.name}.${field.name}`
+        } else if(this.currentArrayName && this.isArray) {
+            fieldName = `${this.currentArrayName}.${field.name}`;
+            // if(index === this.currentEntity.fields.length - 1) {
+            //     this.isArray = false;
+            // }
         } else {
             fieldName = field.name;
         }
 
         if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
-            this.isArray = false;
             return (
                 <Field
                     name={fieldName}
@@ -324,9 +340,6 @@ class FormBuilder extends React.Component<IProps, any> {
                 />
             )
         } else if (field.component && field.name) {
-            if (!field.entityName) {
-                this.isArray = false;
-            }
             return (
                 <Field
                     name={fieldName}
@@ -340,9 +353,6 @@ class FormBuilder extends React.Component<IProps, any> {
                 />
             )
         } else if (field.type === 'string' || field.type === 'number') {
-            if (!field.entityName) {
-                this.isArray = false;
-            }
             return (
                 <Field
                     name={fieldName}
@@ -356,7 +366,6 @@ class FormBuilder extends React.Component<IProps, any> {
                 />
             )
         } else if (field.type === 'button') {
-            this.isArray = false;
             return (
                 <Field
                     name={fieldName}
@@ -376,8 +385,8 @@ class FormBuilder extends React.Component<IProps, any> {
                     isPresent = true;
                     return (
                         <label>
-                            {field.name}
-                            {this.entityEvaluator(entity,true)}
+                            {field.displayName}
+                            {this.entityEvaluator(entity,true, false)}
                         </label>
                     );
                 }
@@ -388,8 +397,32 @@ class FormBuilder extends React.Component<IProps, any> {
             }
         } else if (field.type === 'array') {
             //TODO: How to best handle this
+            return(
+                <div className={'array'}>
+                    <label>{field.displayName}</label>
+                    <button type={'button'} onClick={() => this.formProps.form.mutators.push(field.name,undefined)}>Add+</button>
+                    <FieldArray
+                        name={fieldName}
+                        render={(fieldArrayProps: any) => {
+                            return fieldArrayProps.fields.map((name: any, index: number) => {
+                                console.log('name', name);
+                                return(this.handleArray(fieldArrayProps, field.entityName, name));
+                            })
+                        }}
+                    />
+                </div>
+                )
         }
     };
+
+    handleArray = (fieldArrayProps: any, entityName: string, arrayName: string) => {
+        for(let entity of this.props.schema.entities) {
+            if(entity.name === entityName) {
+                this.currentEntity = entity;
+            }
+        }
+        return(this.entityEvaluator(this.currentEntity, false, true, arrayName));
+    }
 
 }
 

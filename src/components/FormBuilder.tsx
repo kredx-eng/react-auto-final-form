@@ -12,7 +12,7 @@ import {
     LayoutFields,
     SimpleObj
 } from "../interfaces/SchemaInterfaces";
-import {Field, Form, FormProps, FormSpy} from 'react-final-form';
+import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
@@ -28,7 +28,8 @@ interface IProps {
     entityName: string;
     layoutName?: string;
     initialValues?: SimpleObj;
-    subscription?: { [formStateName: string]: boolean }
+    subscription?: { [formStateName: string]: boolean };
+    bottomBar: React.FC<FieldRenderProps<any, HTMLElement>> | React.ComponentClass<FieldRenderProps<any, HTMLElement>>;
 }
 
 
@@ -109,7 +110,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                                     return undefined;
                                                 }
                                             })}
-                                            <button type={"submit"}>Submit</button>
+                                            <Field name={'bottomBar'} component={this.props.bottomBar}/>
                                         </form>
                                     </div>
                                 )
@@ -124,6 +125,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                                 return undefined;
                                             }
                                         })}
+                                        <Field name={'bottomBar'} component={this.props.bottomBar}/>
                                     </form>
                                 );
                             }
@@ -389,18 +391,6 @@ class FormBuilder extends React.Component<IProps, any> {
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
                     type={field.type}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
-                    subscription={{value: true, touched: true, error: true}}
-                />
-            )
-        } else if (field.type === 'button') {
-            return (
-                <Field
-                    name={fieldName}
-                    key={`Field_${field.name}_${index}`}
-                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
-                    component={Button}
-                    enum={field.enum}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 5}
                     subscription={{value: true, touched: true, error: true}}
                 />
             )

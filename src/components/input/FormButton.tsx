@@ -17,7 +17,7 @@ const Button = (props: any) => {
             style={{flex: props.size, maxWidth: '20vh', maxHeight: '30px'}}
             className={'formButton'}
         >
-            {props.displayName}
+            Submit
         </button>
     )
 }

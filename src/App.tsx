@@ -21,7 +21,7 @@ class App extends React.Component<any, any> {
     render() {
         return (
             //<MainWindow/>
-            <FormBuilder onSubmit={this.handleSubmit} schema={arraySchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}}/>
+            <FormBuilder onSubmit={this.handleSubmit} schema={arraySchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button}/>
         );
     }
 

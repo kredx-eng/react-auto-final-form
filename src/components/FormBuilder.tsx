@@ -11,7 +11,7 @@ import {
     Layout,
     LayoutFields
 } from "../interfaces/SchemaInterfaces";
-import {Field, Form} from 'react-final-form';
+import {Field, Form, FormProps} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
@@ -22,15 +22,19 @@ interface IProps {
     onSubmit: (value: any) => void;
     schema: ISchema;
     componentFactory?: ComponentFactory;
+    entityName: string;
+    layoutName?: string;
 }
 
 let formData: { [s: string]: any } = {};
-let currentEntity: string = '';
 
 class FormBuilder extends React.Component<IProps, any> {
     formData: any;
     previousEntity: string;
     isArray: boolean;
+    currentEntity: any;
+    nested: boolean;
+    formProps: Object | FormProps;
 
     constructor(props: IProps) {
         super(props);
@@ -40,14 +44,32 @@ class FormBuilder extends React.Component<IProps, any> {
         this.formData = formData;
         this.previousEntity = '';
         this.isArray = false;
+        this.currentEntity = {};
+        this.formProps = {};
+        this.nested = false;
     }
 
     handleSubmit = (submitData: any) => {
         this.props.onSubmit(formData);
     };
+
+    checkSchema = () => {
+        let isPresent = false;
+        for(let entity of this.props.schema.entities) {
+            if(entity.name === this.props.entityName) {
+                isPresent = true;
+            }
+        }
+        if(!isPresent) {
+            const e = new Error("The given schema doesn't contain any entity with the given entityName");
+            console.error(e);
+        }
+    };
+
     //TODO: Figure out a way to Handle form re-renders much better(Priority)
     render = () => {
         const {entities} = this.props.schema;
+        this.checkSchema();
         return (
             <div className={'container'}>
                 <Form
@@ -57,11 +79,15 @@ class FormBuilder extends React.Component<IProps, any> {
                     validateOnBlur={true}
                     render={(formProps) => {
                         FormHelper.updateFormState(formProps);
-                        this.formData = formData;
+                        this.formProps = formProps;
                         return (
                             <form onSubmit={formProps.handleSubmit}>
                                 {entities.map((entity: IEntities) => {
-                                    return (this.entityEvaluator(entity, formProps))
+                                    if(entity.name === this.props.entityName){
+                                        return (this.entityEvaluator(entity))
+                                    } else {
+                                        return undefined;
+                                    }
                                 })}
                             </form>
                         );
@@ -72,74 +98,65 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
-    entityEvaluator = (entity: IEntities, formProps: any) => {
-        let newObj: { [s: string]: any } = {};
-        // To build the formData object
-        if (this.isArray) {              //If an array is encountered the currently encountered entity should be inside the parent entity
-            newObj[currentEntity] = [];
-            Object.assign(formData, newObj);
-        } else {
-            newObj[entity.name] = {};
-            Object.assign(formData, newObj);
-            currentEntity = entity.name;
-        }
+    entityEvaluator = (entity: IEntities, nested?: boolean) => {
+        this.nested = !!nested;
         if (entity.layouts) {
             const {fields, layouts} = entity;
             if (Array.isArray(layouts)) {
                 for (let layout of layouts) {
                     if (layout.orientation) {
-                        return this.handleOrientation(layout.orientation, layouts, fields, formProps, layout.name)
+                        return this.handleOrientation(layout.orientation, layouts, fields, layout.name)
                     } else {
-                        return this.layoutEvaluator(layout.name, layouts, fields, formProps)
+                        return this.layoutEvaluator(layout.name, layouts, fields)
                     }
                 }
             } else {
                 for (let layoutName in layouts) {
                     if (layouts[layoutName].orientation) {
-                        return this.handleOrientation(layouts[layoutName].orientation, layouts, fields, formProps, layoutName)
+                        return this.handleOrientation(layouts[layoutName].orientation, layouts, fields, layoutName)
                     } else {
-                        return this.layoutEvaluator(layoutName, layouts, fields, formProps);
+                        return this.layoutEvaluator(layoutName, layouts, fields);
                     }
                 }
             }
         } else {
-            return this.fieldEvaluator(entity.fields, formProps)
+            return this.fieldEvaluator(entity.fields)
         }
     };
 
-    layoutEvaluator = (layoutName: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, formProps: any) => {
+    layoutEvaluator = (layoutName: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields) => {
         if (Array.isArray(layouts)) {
             for (let layout of layouts) {
                 if (layout.groups) {
                     const retArray = [];
                     for (let keys in layout) {
                         if (keys == 'fields') {
-                            retArray.push(this.fieldEvaluator(fields, formProps, layout.fields));
+                            retArray.push(this.fieldEvaluator(fields, layout.fields));
                         } else if (keys == 'groups') {
-                            retArray.push(this.groupEvaluator(fields, formProps, layout.groups));
+                            retArray.push(this.groupEvaluator(fields, layout.groups));
                         }
                     }
                     return retArray.map(values => values);
                 } else {
-                    return this.fieldEvaluator(fields, formProps, layout.fields);
+                    return this.fieldEvaluator(fields, layout.fields);
                 }
             }
         } else {
             if (layouts[layoutName].groups) {
                 for (let keys in layouts[layoutName]) {
                     if (keys === 'fields') {
-                        return this.fieldEvaluator(fields, formProps, layouts[layoutName].fields)
+                        return this.fieldEvaluator(fields, layouts[layoutName].fields)
                     } else if (keys === 'groups') {
-                        return this.groupEvaluator(fields, formProps, layouts[layoutName].groups);
+                        return this.groupEvaluator(fields, layouts[layoutName].groups);
                     }
                 }
             } else {
-                return this.fieldEvaluator(fields, formProps, layouts[layoutName].fields);
+                return this.fieldEvaluator(fields, layouts[layoutName].fields);
             }
         }
     };
 
-    fieldEvaluator = (fields: Array<IFields> | Fields, formProps: any, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
+    fieldEvaluator = (fields: Array<IFields> | Fields, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
                 let fieldArray = [];
@@ -157,7 +174,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     }
                     if (fieldArray.length > 0) {
                         return fieldArray.map((field, index) => {
-                            return this.fieldRenderer(field, index, formProps);
+                            return this.fieldRenderer(field, index);
                         });
                     }
                 } else {
@@ -174,7 +191,7 @@ class FormBuilder extends React.Component<IProps, any> {
                             return undefined;
                         }
                         return fieldArray.map((field, index) => {
-                            return this.fieldRenderer(field, index, formProps);
+                            return this.fieldRenderer(field, index);
                         })
                     }
                 }
@@ -189,7 +206,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                     ...layoutFields[field.name],
                                     ...field
                                 };
-                                return this.fieldRenderer(mergedField, index, formProps)
+                                return this.fieldRenderer(mergedField, index)
                             }
                         }
                     })
@@ -208,14 +225,14 @@ class FormBuilder extends React.Component<IProps, any> {
                         }
                     }
                     return fieldArray.map((field, index) => {
-                        return this.fieldRenderer(field, index, formProps);
+                        return this.fieldRenderer(field, index);
                     })
                 }
             }
         } else {
             if (Array.isArray(fields)) {
                 return fields.map((field, index) => {
-                    return this.fieldRenderer(field, index, formProps);
+                    return this.fieldRenderer(field, index);
                 });
             } else {
                 let fieldArray = [];
@@ -227,68 +244,76 @@ class FormBuilder extends React.Component<IProps, any> {
                     fieldArray.push(mergedField);
                 }
                 return fieldArray.map((field, index) => {
-                    return this.fieldRenderer(field, index, formProps);
+                    return this.fieldRenderer(field, index);
                 });
             }
         }
     };
 
-    groupEvaluator = (fields: Array<IFields> | Fields, formProps: any, groups?: Group) => {
+    groupEvaluator = (fields: Array<IFields> | Fields, groups?: Group) => {
+        //TODO: To be handled differently
         for (let groupName in groups) {
             if (groups[groupName].orientation) {
                 if (groups[groupName].orientation === 'vertical') {
                     return (
                         <div className={'verticalGroup'} key={groupName}>
-                            {this.fieldEvaluator(fields, formProps, groups[groupName].fields)}
+                            {this.fieldEvaluator(fields, groups[groupName].fields)}
                         </div>
                     )
                 } else if (groups[groupName].orientation === 'horizontal') {
                     return (
                         <div className={'horizontalGroup'} key={groupName}>
-                            {this.fieldEvaluator(fields, formProps, groups[groupName].fields)}
+                            {this.fieldEvaluator(fields, groups[groupName].fields)}
                         </div>
                     )
                 }
             } else {
                 return (
                     <div className={'verticalGroup'} key={groupName}>
-                        {this.fieldEvaluator(fields, formProps, groups[groupName].fields)}
+                        {this.fieldEvaluator(fields, groups[groupName].fields)}
                     </div>
                 )
             }
         }
     };
 
-    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, formProps: any, layoutName?: string) => {
+    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string) => {
         orientation = FormHelper.metaDataEvaluator(orientation);
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
                     <div className={'verticalLayout'} key={layoutName}>
-                        {this.layoutEvaluator(layoutName, layouts, fields, formProps)}
+                        {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
             } else if (orientation === 'horizontal') {
                 return (
                     <div className={'horizontalLayout'} key={layoutName}>
-                        {this.layoutEvaluator(layoutName, layouts, fields, formProps)}
+                        {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
             }
         }
     };
 
-    fieldRenderer = (field: any, index: number, formProps: any): any => {
+    fieldRenderer = (field: any, index: number): any => {
+        let fieldName = '';
         //TODO: Add functionality for document upload
-        if (!field.name) {
-            field.name = `defaultName${index}`
+
+        if(this.currentEntity!=={} && this.nested) {
+            if(index === this.currentEntity.fields.length - 1) {
+                this.nested = false;
+            }
+            fieldName = `${this.currentEntity.name}.${field.name}`
+        } else {
+            fieldName = field.name;
         }
 
         if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
             this.isArray = false;
             return (
                 <Field
-                    name={`${currentEntity}.${field.name}`}
+                    name={fieldName}
                     component={this.props.componentFactory[field.component]}
                     key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
@@ -304,7 +329,7 @@ class FormBuilder extends React.Component<IProps, any> {
             }
             return (
                 <Field
-                    name={`${currentEntity}.${field.name}`}
+                    name={fieldName}
                     component={field.component}
                     key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
@@ -320,7 +345,7 @@ class FormBuilder extends React.Component<IProps, any> {
             }
             return (
                 <Field
-                    name={`${currentEntity}.${field.name}`}
+                    name={fieldName}
                     key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={TextInputField}
@@ -334,7 +359,7 @@ class FormBuilder extends React.Component<IProps, any> {
             this.isArray = false;
             return (
                 <Field
-                    name={`${currentEntity}.${field.name}`}
+                    name={fieldName}
                     key={`Field_${field.name}_${index}`}
                     displayName={FormHelper.metaDataEvaluator(field.displayName)}
                     component={Button}
@@ -344,29 +369,27 @@ class FormBuilder extends React.Component<IProps, any> {
                 />
             )
         } else if (field.type === 'entity') {
-
-            if (field.entityType) {
-                field.type = field.entityType;
-            } else {
-                field.type = 'string';
+            let isPresent = false;
+            for(let entity of this.props.schema.entities) {
+                if(entity.name === field.entityName) {
+                    this.currentEntity = entity;
+                    isPresent = true;
+                    return (
+                        <label>
+                            {field.name}
+                            {this.entityEvaluator(entity,true)}
+                        </label>
+                    );
+                }
             }
-            return this.fieldRenderer(field, index, formProps)
+            if(!isPresent) {
+                const e = new Error("The given entityName of the field doesn't match with the entities in the schema");
+                console.error(e);
+            }
         } else if (field.type === 'array') {
-            this.handleArray(field, formProps);
+            //TODO: How to best handle this
         }
     };
-
-    handleArray = (field: any, formProps: any) => {
-        //TODO: How to best handle this
-        const {entities} = this.props.schema;
-        entities.map((entity) => {
-            if (entity.name === field.entityName) {
-                this.isArray = true;
-                this.previousEntity = currentEntity;
-                return this.entityEvaluator(entity, formProps);
-            } else return null
-        });
-    }
 
 }
 

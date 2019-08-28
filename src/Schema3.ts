@@ -4,41 +4,49 @@ import {validators} from "./utils/Validators";
 export const arraySchema: ISchema = {
     entities: [
         {
-            name: 'first',
-            fields:[
+            name: "contact",
+            fields: [
                 {
-                    name: 'email',
-                    type: 'string',
-                    validators: ['email', 'required']
+                    name: "phones",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Phones"
                 },
                 {
-                    name: 'firstName',
-                    type: 'string',
-                    validators: 'required'
+                    name: "phones2",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Custom size",
+                    size: 6
                 },
                 {
-                    name: 'submit',
-                    type: 'button',
+                    name: "phones3",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Custom add text",
+                    // addText: 'Add new phone'
                 }
-            ],
-            layouts: {
-                basic: {
-                    orientation: "vertical",
-                    fields: {
-                        email: {
-                            displayName: 'Email',
-                            size: 9,
-                        },
-                        firstName: {
-                            displayName: 'First Name',
-                            size: 7,
-                        },
-                        submit: {
-                            displayName: 'FEKO',
-                        }
-                    }
+            ]
+        },
+        {
+            name: "phone",
+            fields: [
+                {
+                    displayName: 'Area code',
+                    name: "areaCode",
+                    type: "string",
+                    size: 3
+                },
+                {
+                    displayName: 'Number',
+                    name: "number",
+                    type: "string",
+                    size: 9
                 }
-            }
+            ]
         }
     ]
 }

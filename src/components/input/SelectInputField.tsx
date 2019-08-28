@@ -6,7 +6,7 @@ const SelectInputField = (props: any) => {
         <div className={'field'} style={{flex: props.size}} key={input.name}>
             <label>{props.displayName}</label>
             <select name={props.displayName} onChange={props.input.onChange} onFocus={input.onFocus}
-                    onBlur={input.onBlur} defaultValue={''}>
+                    onBlur={input.onBlur} defaultValue={''} value={input.value}>
                 {props.enum.map((options: any) => {
                     return (
                         <option value={options}>{options}</option>

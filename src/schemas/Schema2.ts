@@ -1,6 +1,6 @@
-import {ISchema} from "./interfaces/SchemaInterfaces";
-import TextInputField from "./components/input/TextInputField";
-import {validators} from "./utils/Validators";
+import {ISchema} from "../interfaces/SchemaInterfaces";
+import TextInputField from "../components/input/TextInputField";
+import {validators} from "../utils/Validators";
 
 export const newSchema: ISchema = {
     entities: [

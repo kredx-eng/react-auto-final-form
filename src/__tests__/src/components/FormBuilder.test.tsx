@@ -1,7 +1,7 @@
 import React from "react";
 import {mount, render} from 'enzyme';
 import FormBuilder from "../../../components/FormBuilder";
-import {newSchema} from "../../../Schema2";
+import {newSchema} from "../../../schemas/Schema2";
 import TextInputField from "../../../components/input/TextInputField";
 import SelectInputField from "../../../components/input/SelectInputField";
 import Button from "../../../components/input/FormButton";

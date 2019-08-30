@@ -12,6 +12,7 @@ interface IProps {
 
 const TextInputField = (props: any) => {
     const {input, meta} = props;
+    console.log(props,' fieldProps');
     return (
         <div className={'field'} style={{flex: props.size}} key={input.name}>
             <label className={'label'}>{props.displayName}</label>

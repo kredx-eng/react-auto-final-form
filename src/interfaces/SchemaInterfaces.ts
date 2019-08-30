@@ -1,7 +1,7 @@
 import {Validators} from "../utils/Validators";
 import {FormRenderProps} from "react-final-form";
 
-export interface IFields extends ILayoutFields{
+export interface IFields extends ILayoutFields {
     name?: string ;
     type: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document';
     component?: any;
@@ -12,6 +12,10 @@ export interface IFields extends ILayoutFields{
     entityName?: string | FieldFn;
     format?: string;
     addText?: string;
+    options?: Array<Options>;
+    readonly?: boolean;
+    subscriptions?: {[name: string]: boolean};
+    hidden?: boolean | FieldFn
 }
 
 export interface IEntities {
@@ -70,3 +74,5 @@ export type FieldFn = (formState: FormRenderProps, parameter?: any) => any;
 export type SimpleObj = {
     [name: string]: any
 }
+
+export type Options = {value: string, text: string}

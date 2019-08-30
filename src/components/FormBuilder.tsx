@@ -16,10 +16,22 @@ import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-for
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
-import Button from "./input/FormButton";
 import {FormHelper} from "../utils/FormHelper";
 import {FieldArray} from 'react-final-form-arrays';
-import arrayMutators from 'final-form-arrays'
+import arrayMutators from 'final-form-arrays';
+import createDecorator from "final-form-calculate";
+
+const decor = createDecorator({
+    field: 'name',
+    updates: {
+        notname: (values, allValues: any, prevValues: any) => {console.log(values, allValues,prevValues,'value'); return {values:values, name:"bla"}}
+    }
+});
+
+
+//TODO: Handle size better in each component
+
+let fieldNameStack: Array<string> = [];
 
 interface IProps {
     onSubmit: (value: any) => void;
@@ -31,7 +43,6 @@ interface IProps {
     subscription?: { [formStateName: string]: boolean };
     bottomBar: React.FC<FieldRenderProps<any, HTMLElement>> | React.ComponentClass<FieldRenderProps<any, HTMLElement>>;
 }
-
 
 let renderCount = 0;
 
@@ -46,9 +57,6 @@ class FormBuilder extends React.Component<IProps, any> {
 
     constructor(props: IProps) {
         super(props);
-        this.state = {
-            formData: {},
-        };
         this.previousEntity = '';
         this.isArray = false;
         this.currentEntity = {};
@@ -73,23 +81,23 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
 
-    //TODO: Figure out a way to Handle form re-renders much better(Priority)
     render = () => {
         try {
-            renderCount+=1;
             const {entities} = this.props.schema;
             this.checkSchema();
-            console.log(renderCount,'count')
             return (
                 <div className={'container'}>
                     <Form
                         onSubmit={this.handleSubmit}
                         initialValues={this.props.initialValues ? this.props.initialValues : undefined}
                         subscription={this.props.subscription ? this.props.subscription : undefined}
+                        decorators={[decor]}
                         validateOnBlur={true}
                         mutators={{...arrayMutators}}
                         render={(formProps) => {
                             FormHelper.updateFormState(formProps);
+                            renderCount += 1;
+                            console.log(renderCount, 'count', formProps);
                             this.formProps = formProps;
                             if (this.props.subscription && !this.props.subscription.values) {
                                 console.log('spy')
@@ -141,6 +149,7 @@ class FormBuilder extends React.Component<IProps, any> {
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
     entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
+        fieldNameStack = !nested ? [] : fieldNameStack;
         this.nested = nested;
         this.isArray = isArray;
         this.currentArrayName = arrayName;
@@ -173,6 +182,7 @@ class FormBuilder extends React.Component<IProps, any> {
             for (let layout of layouts) {
                 if (layout.groups) {
                     const retArray = [];
+                    //TODO: Groups to be handled differently
                     for (let keys in layout) {
                         if (keys == 'fields') {
                             retArray.push(this.fieldEvaluator(fields, layout.fields));
@@ -189,7 +199,7 @@ class FormBuilder extends React.Component<IProps, any> {
             if (layouts[layoutName].groups) {
                 for (let keys in layouts[layoutName]) {
                     if (keys === 'fields') {
-                        return this.fieldEvaluator(fields, layouts[layoutName].fields)
+                        return this.fieldEvaluator(fields, layouts[layoutName].fields);
                     } else if (keys === 'groups') {
                         return this.groupEvaluator(fields, layouts[layoutName].groups);
                     }
@@ -203,6 +213,7 @@ class FormBuilder extends React.Component<IProps, any> {
     fieldEvaluator = (fields: Array<IFields> | Fields, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
+                // Field of type Array or Object both are handled as array in each cases, every block has its own variable fieldArray for block scoping
                 let fieldArray = [];
                 if (Array.isArray(fields)) {
                     for (let layoutFieldName in layoutFields) {
@@ -222,6 +233,7 @@ class FormBuilder extends React.Component<IProps, any> {
                         });
                     }
                 } else {
+                    //When fields are of type object with key as the name
                     let fieldArray = [];
                     for (let key in layoutFields) {
                         if (fields.hasOwnProperty(key)) {
@@ -240,6 +252,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     }
                 }
             } else {
+                //when layout fields are of type object with key as the name
                 if (Array.isArray(fields)) {
                     return fields.map((field, index) => {
                         if (field.name) {
@@ -348,7 +361,7 @@ class FormBuilder extends React.Component<IProps, any> {
             if (index === this.currentEntity.fields.length - 1) {
                 this.nested = false;
             }
-            fieldName = `${this.currentEntity.name}.${field.name}`
+            fieldName = `${fieldNameStack.join('.')}.${field.name}`
         } else if (this.currentArrayName && this.isArray) {
             fieldName = `${this.currentArrayName}.${field.name}`;
         } else {
@@ -378,7 +391,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
                     enum={field.enum ? field.enum : []}
-                    subscription={{value: true, touched: true, error: true}}
+                    subscription={{value: true,touched: true, error: true}}
                 />
             )
         } else if (field.type === 'string' || field.type === 'number') {
@@ -391,7 +404,8 @@ class FormBuilder extends React.Component<IProps, any> {
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
                     type={field.type}
                     size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
-                    subscription={{value: true, touched: true, error: true}}
+                    subscription={{value:true, touched: true, error: true}}
+                    placeholder={field.displayName}
                 />
             )
         } else if (field.type === 'entity') {
@@ -399,6 +413,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 throw Error('There should be an entityName for schema for a field of type entity');
             }
             let isPresent = false;
+            fieldNameStack.push(field.name);
             for (let entity of this.props.schema.entities) {
                 if (entity.name === field.entityName) {
                     this.currentEntity = entity;
@@ -433,7 +448,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     <FieldArray
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
-                            return fieldArrayProps.fields.map((name: any, index: number) => {
+                            return fieldArrayProps.fields.map((name: any) => {
                                 return (this.handleArray(fieldArrayProps, field.entityName, name));
                             })
                         }}

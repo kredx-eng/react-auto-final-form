@@ -97,11 +97,9 @@ class MainWindow extends React.Component <any, any> {
 
     handleSelectInputChange = (value: any) => {
         this.setState({currentSchema: DEMO_SCHEMAS[value].value});
-        console.log(value, 'called', DEMO_SCHEMAS[value])
     };
 
     updateSchema = () => {
-        console.log(JSON.parse(this.editorValue));
         this.setState({currentSchema: JSON.parse(this.editorValue)});
     };
 

@@ -9,7 +9,7 @@ import {
     ILayoutFields,
     ISchema,
     Layout,
-    LayoutFields,
+    LayoutFields, RenderOption,
     SimpleObj
 } from "../interfaces/SchemaInterfaces";
 import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-form';
@@ -20,13 +20,7 @@ import {FormHelper} from "../utils/FormHelper";
 import {FieldArray} from 'react-final-form-arrays';
 import arrayMutators from 'final-form-arrays';
 import createDecorator from "final-form-calculate";
-
-const decor = createDecorator({
-    field: 'name',
-    updates: {
-        notname: (values, allValues: any, prevValues: any) => {console.log(values, allValues,prevValues,'value'); return {values:values, name:"bla"}}
-    }
-});
+import SpyWrapper from "./spyWrapper";
 
 
 //TODO: Handle size better in each component
@@ -42,6 +36,8 @@ interface IProps {
     initialValues?: SimpleObj;
     subscription?: { [formStateName: string]: boolean };
     bottomBar: React.FC<FieldRenderProps<any, HTMLElement>> | React.ComponentClass<FieldRenderProps<any, HTMLElement>>;
+    allFieldsSubscription?: { [fieldStateName: string]: boolean };
+    renderOption?: RenderOption;
 }
 
 let renderCount = 0;
@@ -80,7 +76,6 @@ class FormBuilder extends React.Component<IProps, any> {
         }
     };
 
-
     render = () => {
         try {
             const {entities} = this.props.schema;
@@ -91,52 +86,24 @@ class FormBuilder extends React.Component<IProps, any> {
                         onSubmit={this.handleSubmit}
                         initialValues={this.props.initialValues ? this.props.initialValues : undefined}
                         subscription={this.props.subscription ? this.props.subscription : undefined}
-                        decorators={[decor]}
+                        // decorators={[decor]}
                         validateOnBlur={true}
                         mutators={{...arrayMutators}}
                         render={(formProps) => {
-                            FormHelper.updateFormState(formProps);
-                            renderCount += 1;
-                            console.log(renderCount, 'count', formProps);
                             this.formProps = formProps;
-                            if (this.props.subscription && !this.props.subscription.values) {
-                                console.log('spy')
-                                return (
-                                    <div>
-                                        <FormSpy render={
-                                            (formSpyProps: any) => {
-                                                this.formProps = formSpyProps;
-                                                FormHelper.updateFormState(formSpyProps);
-                                                return (<p></p>)
-                                            }
-                                        }/>
-                                        <form onSubmit={formProps.handleSubmit}>
-                                            {entities.map((entity: IEntities) => {
-                                                if (entity.name === this.props.entityName) {
-                                                    return (this.entityEvaluator(entity, false, false))
-                                                } else {
-                                                    return undefined;
-                                                }
-                                            })}
-                                            <Field name={'bottomBar'} component={this.props.bottomBar}/>
-                                        </form>
-                                    </div>
-                                )
-
-                            } else {
-                                return (
-                                    <form onSubmit={formProps.handleSubmit}>
-                                        {entities.map((entity: IEntities) => {
-                                            if (entity.name === this.props.entityName) {
-                                                return (this.entityEvaluator(entity, false, false))
-                                            } else {
-                                                return undefined;
-                                            }
-                                        })}
-                                        <Field name={'bottomBar'} component={this.props.bottomBar}/>
-                                    </form>
-                                );
-                            }
+                            FormHelper.updateFormState(formProps);
+                            return (
+                                <form onSubmit={formProps.handleSubmit}>
+                                    {entities.map((entity: IEntities) => {
+                                        if (entity.name === this.props.entityName) {
+                                            return (this.entityEvaluator(entity, false, false))
+                                        } else {
+                                            return undefined;
+                                        }
+                                    })}
+                                    <Field name={'bottomBar'} component={this.props.bottomBar}/>
+                                </form>
+                            );
                         }}
                     />
                 </div>
@@ -335,7 +302,6 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string) => {
-        orientation = FormHelper.metaDataEvaluator(orientation);
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
@@ -353,7 +319,7 @@ class FormBuilder extends React.Component<IProps, any> {
         }
     };
 
-    fieldRenderer = (field: any, index: number): any => {
+    public fieldRenderer = (field: any, index?: number): any => {
         let fieldName = '';
         //TODO: Add functionality for document upload
 
@@ -368,17 +334,32 @@ class FormBuilder extends React.Component<IProps, any> {
             fieldName = field.name;
         }
 
-        if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
+        if(this.fieldPropertyCheck(field)) {
+            return (
+                <FormSpy
+                    render={(formSpyProps) => {
+                        return (
+                            <SpyWrapper
+                                field={field} formData={formSpyProps}
+                                renderOptions={this.props.renderOption ? this.props.renderOption : undefined }
+                                subscription={this.fieldSubscriptionEvaluator(field)}
+                            />
+                        )
+                    }}
+                />
+            )
+        } else if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
             return (
                 <Field
                     name={fieldName}
                     component={this.props.componentFactory[field.component]}
                     key={`Field_${field.name}_${index}`}
-                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
+                    displayName={field.displayName}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
                     enum={field.enum ? field.enum : []}
-                    subscription={{value: true, touched: true, error: true}}
+                    subscription={this.fieldSubscriptionEvaluator(field)}
+                    hidden={field.hidden ? field.hidden : undefined}
                 />
             )
         } else if (field.component && field.name) {
@@ -387,11 +368,12 @@ class FormBuilder extends React.Component<IProps, any> {
                     name={fieldName}
                     component={field.component}
                     key={`Field_${field.name}_${index}`}
-                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
+                    displayName={field.displayName}
                     validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
                     enum={field.enum ? field.enum : []}
-                    subscription={{value: true,touched: true, error: true}}
+                    subscription={this.fieldSubscriptionEvaluator(field)}
+                    hidden={field.hidden ? field.hidden : undefined}
                 />
             )
         } else if (field.type === 'string' || field.type === 'number') {
@@ -399,13 +381,14 @@ class FormBuilder extends React.Component<IProps, any> {
                 <Field
                     name={fieldName}
                     key={`Field_${field.name}_${index}`}
-                    displayName={FormHelper.metaDataEvaluator(field.displayName)}
+                    displayName={field.displayName}
                     component={TextInputField}
                     validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
                     type={field.type}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size) : 10}
-                    subscription={{value:true, touched: true, error: true}}
+                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
+                    subscription={this.fieldSubscriptionEvaluator(field)}
                     placeholder={field.displayName}
+                    hidden={field.hidden ? field.hidden : undefined}
                 />
             )
         } else if (field.type === 'entity') {
@@ -465,6 +448,24 @@ class FormBuilder extends React.Component<IProps, any> {
             }
         }
         return (this.entityEvaluator(this.currentEntity, false, true, arrayName));
+    };
+
+    //To check whether any field property is of type function
+    fieldPropertyCheck = (field: Fields) => {
+        for (let key in field) {
+            if(typeof field[key] === 'function') {
+                return true;
+            }
+        }
+        return false
+    }
+
+    fieldSubscriptionEvaluator = (field: IFields) => {
+        if(field.subscription) {
+            return field.subscription;
+        } else if (this.props.allFieldsSubscription) {
+            return this.props.allFieldsSubscription
+        } else return undefined
     }
 
 }

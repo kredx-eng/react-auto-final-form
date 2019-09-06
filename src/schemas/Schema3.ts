@@ -13,8 +13,20 @@ export const arraySchema: ISchema = {
                 },
                 {
                     name: "notname",
-                    displayName: "notName",
+                    displayName: (formProps, value) => {
+                        if(value.name && value.name === 'Aarshi'){
+                            return 'Aarshi'
+                        } else return 'ChangedName'
+
+                    },
                     type: "string",
+                    hidden: (formProps, value) => {
+                        if(value.name && value.name === 'asdf') {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
                 },
                 {
                     name: "email",

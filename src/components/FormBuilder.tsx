@@ -4,12 +4,13 @@ import {
     Fields,
     Group,
     IEntities,
-    IFields,
+    IFields, IGroups,
     ILayout,
     ILayoutFields,
     ISchema,
     Layout,
-    LayoutFields, RenderOption,
+    LayoutFields,
+    RenderOption,
     SimpleObj
 } from "../interfaces/SchemaInterfaces";
 import {Field, FieldRenderProps, Form, FormProps, FormSpy, FormSpyRenderProps} from 'react-final-form';
@@ -19,11 +20,8 @@ import './FormBuilder.css';
 import {FormHelper} from "../utils/FormHelper";
 import {FieldArray} from 'react-final-form-arrays';
 import arrayMutators from 'final-form-arrays';
-import createDecorator from "final-form-calculate";
 import SpyWrapper from "./SpyWrapper";
 
-
-//TODO: Handle size better in each component
 
 let fieldNameStack: Array<string> = [];
 
@@ -115,7 +113,7 @@ class FormBuilder extends React.Component<IProps, any> {
     entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
         this.nested = nested;
         this.isArray = isArray;
-        if(fieldNameStack!=[]) {
+        if (fieldNameStack != []) {
             this.currentArrayName = `${fieldNameStack.join('.')}.${arrayName}`
         } else {
             this.currentArrayName = `${arrayName}`
@@ -123,21 +121,33 @@ class FormBuilder extends React.Component<IProps, any> {
         fieldNameStack = !nested ? [] : fieldNameStack;
         if (entity.layouts) {
             const {fields, layouts} = entity;
+            if (!this.props.layoutName) {
+                throw Error('When using layouts please specify the property layoutName')
+            }
             if (Array.isArray(layouts)) {
+                let isPresent = false;
                 for (let layout of layouts) {
-                    if (layout.orientation) {
-                        return this.handleOrientation(layout.orientation, layouts, fields, layout.name)
-                    } else {
-                        return this.layoutEvaluator(layout.name, layouts, fields)
+                    if (layout.name === this.props.layoutName) {
+                        isPresent = true;
+                        if (layout.orientation) {
+                            return this.handleOrientation(layout.orientation, layouts, fields, layout.name)
+                        } else {
+                            return this.layoutEvaluator(layout.name, layouts, fields)
+                        }
+                    }
+                    if (!isPresent) {
+                        throw Error("The provided prop layoutName doesn't match with any layout name given the schema")
                     }
                 }
             } else {
-                for (let layoutName in layouts) {
-                    if (layouts[layoutName].orientation) {
-                        return this.handleOrientation(layouts[layoutName].orientation, layouts, fields, layoutName)
+                if (layouts.hasOwnProperty(this.props.layoutName)) {
+                    if (layouts[this.props.layoutName].orientation) {
+                        return this.handleOrientation(layouts[this.props.layoutName].orientation, layouts, fields, layouts[this.props.layoutName].name)
                     } else {
-                        return this.layoutEvaluator(layoutName, layouts, fields);
+                        return this.layoutEvaluator(this.props.layoutName, layouts, fields)
                     }
+                } else {
+                    throw Error("The provided prop layoutName doesn't match with any layout name given the schema")
                 }
             }
         } else {
@@ -148,48 +158,37 @@ class FormBuilder extends React.Component<IProps, any> {
     layoutEvaluator = (layoutName: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields) => {
         if (Array.isArray(layouts)) {
             for (let layout of layouts) {
-                if (layout.groups) {
-                    const retArray = [];
-                    //TODO: Groups to be handled differently
-                    for (let keys in layout) {
-                        if (keys == 'fields') {
-                            retArray.push(this.fieldEvaluator(fields, layout.fields));
-                        } else if (keys == 'groups') {
-                            retArray.push(this.groupEvaluator(fields, layout.groups));
-                        }
+                if (layout.name === this.props.layoutName) {
+                    if (layout.groups) {
+                        return this.fieldEvaluator(fields, layout.fields, layout.groups);
+
+                    } else {
+                        return this.fieldEvaluator(fields, layout.fields);
                     }
-                    return retArray.map(values => values);
-                } else {
-                    return this.fieldEvaluator(fields, layout.fields);
                 }
             }
         } else {
             if (layouts[layoutName].groups) {
-                for (let keys in layouts[layoutName]) {
-                    if (keys === 'fields') {
-                        return this.fieldEvaluator(fields, layouts[layoutName].fields);
-                    } else if (keys === 'groups') {
-                        return this.groupEvaluator(fields, layouts[layoutName].groups);
-                    }
-                }
+                return this.fieldEvaluator(fields, layouts[layoutName].fields, layouts[layoutName].groups);
+
             } else {
                 return this.fieldEvaluator(fields, layouts[layoutName].fields);
             }
         }
     };
 
-    fieldEvaluator = (fields: Array<IFields> | Fields, layoutFields?: Array<ILayoutFields> | LayoutFields) => {
+    fieldEvaluator = (fields: Array<IFields> | Fields, layoutFields?: Array<ILayoutFields> | LayoutFields, groups?: Group) => {
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
                 // Field of type Array or Object both are handled as array in each cases, every block has its own variable fieldArray for block scoping
                 let fieldArray = [];
                 if (Array.isArray(fields)) {
-                    for (let layoutFieldName in layoutFields) {
-                        for (let fieldName in fields) {
-                            if (layoutFieldName === fieldName) {
+                    for (let layoutFieldIndex in layoutFields) {
+                        for (let fieldIndex in fields) {
+                            if (layoutFields[layoutFieldIndex].name === fields[fieldIndex].name) {
                                 const mergedField = {
-                                    ...layoutFields[layoutFieldName],
-                                    ...fields[fieldName],
+                                    ...layoutFields[layoutFieldIndex],
+                                    ...fields[fieldIndex],
                                 };
                                 fieldArray.push(mergedField);
                             }
@@ -197,7 +196,15 @@ class FormBuilder extends React.Component<IProps, any> {
                     }
                     if (fieldArray.length > 0) {
                         return fieldArray.map((field, index) => {
-                            return this.fieldRenderer(field, index);
+                            if(field.group && groups) {
+                                if(groups.hasOwnProperty(field.group)) {
+                                    return this.groupEvaluator(groups[field.group], fields)
+                                } else {
+                                    throw Error("The given group name doesn't exist")
+                                }
+                            } else {
+                                return this.fieldRenderer(field, index);
+                            }
                         });
                     }
                 } else {
@@ -215,7 +222,15 @@ class FormBuilder extends React.Component<IProps, any> {
                             return undefined;
                         }
                         return fieldArray.map((field, index) => {
-                            return this.fieldRenderer(field, index);
+                            if(field.group && groups) {
+                                if(groups.hasOwnProperty(field.group)) {
+                                    return this.groupEvaluator(groups[field.group], fields)
+                                } else {
+                                    throw Error("The given group name doesn't exist")
+                                }
+                            } else {
+                                return this.fieldRenderer(field, index);
+                            }
                         })
                     }
                 }
@@ -231,7 +246,15 @@ class FormBuilder extends React.Component<IProps, any> {
                                     ...layoutFields[field.name],
                                     ...field
                                 };
-                                return this.fieldRenderer(mergedField, index)
+                                if(field.group && groups) {
+                                    if(groups.hasOwnProperty(field.group)) {
+                                        return this.groupEvaluator(groups[field.group], fields)
+                                    } else {
+                                        throw Error("The given group name doesn't exist")
+                                    }
+                                } else {
+                                    return this.fieldRenderer(mergedField, index);
+                                }
                             }
                         }
                     })
@@ -250,7 +273,15 @@ class FormBuilder extends React.Component<IProps, any> {
                         }
                     }
                     return fieldArray.map((field, index) => {
-                        return this.fieldRenderer(field, index);
+                        if(field.group && groups) {
+                            if(groups.hasOwnProperty(field.group)) {
+                                return this.groupEvaluator(groups[field.group], fields)
+                            } else {
+                                throw Error("The given group name doesn't exist")
+                            }
+                        } else {
+                            return this.fieldRenderer(field, index);
+                        }
                     })
                 }
             }
@@ -269,37 +300,43 @@ class FormBuilder extends React.Component<IProps, any> {
                     fieldArray.push(mergedField);
                 }
                 return fieldArray.map((field, index) => {
-                    return this.fieldRenderer(field, index);
+                    if(field.group && groups) {
+                        if(groups.hasOwnProperty(field.group)) {
+                            return this.groupEvaluator(groups[field.group], fields)
+                        } else {
+                            throw Error("The given group name doesn't exist")
+                        }
+                    } else {
+                        return this.fieldRenderer(field, index);
+                    }
                 });
             }
         }
     };
 
-    groupEvaluator = (fields: Array<IFields> | Fields, groups?: Group) => {
+    groupEvaluator = (group: IGroups, fields: Fields | Array<IFields>) => {
         //TODO: To be handled differently
-        for (let groupName in groups) {
-            if (groups[groupName].orientation) {
-                if (groups[groupName].orientation === 'vertical') {
+            if (group.orientation) {
+                if (group.orientation === 'vertical') {
                     return (
-                        <div className={'verticalGroup'} key={groupName}>
-                            {this.fieldEvaluator(fields, groups[groupName].fields)}
+                        <div className={'verticalGroup'}>
+                            {this.fieldEvaluator(fields, group.fields)}
                         </div>
                     )
-                } else if (groups[groupName].orientation === 'horizontal') {
+                } else if (group.orientation === 'horizontal') {
                     return (
-                        <div className={'horizontalGroup'} key={groupName}>
-                            {this.fieldEvaluator(fields, groups[groupName].fields)}
+                        <div className={'horizontalGroup'}>
+                            {this.fieldEvaluator(fields, group.fields)}
                         </div>
                     )
                 }
             } else {
                 return (
-                    <div className={'verticalGroup'} key={groupName}>
-                        {this.fieldEvaluator(fields, groups[groupName].fields)}
+                    <div className={'verticalGroup'}>
+                        {this.fieldEvaluator(fields, group.fields)}
                     </div>
                 )
             }
-        }
     };
 
     handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string) => {
@@ -335,7 +372,7 @@ class FormBuilder extends React.Component<IProps, any> {
             fieldName = field.name;
         }
 
-        if(this.fieldPropertyCheck(field)) {
+        if (this.fieldPropertyCheck(field)) {
             field.name = fieldName;
             return (
                 <FormSpy
@@ -345,7 +382,7 @@ class FormBuilder extends React.Component<IProps, any> {
                             <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
                                 <SpyWrapper
                                     field={field} formData={formSpyProps}
-                                    renderOptions={this.props.renderOption ? this.props.renderOption : undefined }
+                                    renderOptions={this.props.renderOption ? this.props.renderOption : undefined}
                                     subscription={this.fieldSubscriptionEvaluator(field)}
                                 />
                             </div>
@@ -463,7 +500,7 @@ class FormBuilder extends React.Component<IProps, any> {
     //To check whether any field property is of type function
     fieldPropertyCheck = (field: any) => {
         for (let key in field) {
-            if(typeof field[key] === 'function') {
+            if (typeof field[key] === 'function') {
                 return true;
             }
         }
@@ -471,35 +508,56 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     fieldSubscriptionEvaluator = (field: IFields) => {
-        if(field.subscription) {
+        if (field.subscription) {
             return field.subscription;
         } else if (this.props.allFieldsSubscription) {
             return this.props.allFieldsSubscription
         } else return undefined
     }
 
+    //Builds style object dependent upon the size property passed in the field
     buildCustomStyle = (field: IFields) => {
-        const max = 100;
         let size: number;
         let styleObj = {};
-        if(field.hidden) {
+        if (field.hidden) {
             Object.assign(styleObj, {display: 'hidden'})
         }
-        if(field.size && typeof field.size !== 'function') {
-            // @ts-ignore
+        if (field.size && typeof field.size !== 'function') {
             size = field.size * 10;
-            let minSize = size/2;
-            if(field.type !== 'array') {
-                Object.assign(styleObj,{flex: field.size, maxWidth: `${size}vw`, flexWrap: 'wrap', minWidth: `${minSize}vw`})
+            let minSize = size / 2;
+            if (field.type !== 'array') {
+                Object.assign(styleObj, {
+                    flex: field.size,
+                    maxWidth: `${size}vw`,
+                    flexWrap: 'wrap',
+                    minWidth: `${minSize}vw`
+                })
             } else {
-                Object.assign(styleObj,{flex: field.size, maxWidth: `${size}vw`, flexWrap: 'wrap', minWidth: `${minSize}vw`, width: `${size}vw`})
+                Object.assign(styleObj, {
+                    flex: field.size,
+                    maxWidth: `${size}vw`,
+                    flexWrap: 'wrap',
+                    minWidth: `${minSize}vw`,
+                    width: `${size}vw`
+                })
             }
+        } else {
+            size = 100;
+            let minSize = size / 2;
+            Object.assign(styleObj, {
+                flex: size / 10,
+                maxWidth: `${size}vw`,
+                flexWrap: 'wrap',
+                minWidth: `${minSize}vw`,
+                width: `${size}vw`
+            })
         }
         return styleObj;
     };
 
+    //Evaluates all the properties in the field when the type of field property is function
     fieldFunctionEvaluator = (field: any, formSpyProps: FormSpyRenderProps) => {
-        for(let key in field) {
+        for (let key in field) {
             field[key] = FormHelper.metaDataEvaluator(field[key], formSpyProps)
         }
         return field;

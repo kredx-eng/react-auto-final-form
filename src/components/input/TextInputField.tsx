@@ -2,7 +2,6 @@ import React from "react";
 import {IFields, ILayout} from "../../interfaces/SchemaInterfaces";
 import {FieldRenderProps} from "react-final-form";
 import './TextInputField.css';
-import {FormHelper} from "../../utils/FormHelper";
 
 interface IProps {
     field: IFields;

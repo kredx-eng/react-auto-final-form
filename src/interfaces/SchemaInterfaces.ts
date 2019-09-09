@@ -3,10 +3,9 @@ import {FormRenderProps, FormSpyRenderProps} from "react-final-form";
 
 export interface IFields extends ILayoutFields {
     name?: string ;
-    type: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document';
+    type: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document' | 'group';
     component?: any;
     validators?: Array< Validators | string > | Validators | string;
-    enum?: Array<any> | FieldFn;
     arrayType?: 'entity';
     layoutName?: string;
     entityName?: string | FieldFn;
@@ -38,6 +37,10 @@ export interface ILayoutFields {
     hidden?: boolean | FieldFn;
     placeholder?: string | FieldFn;
     name?: string;
+    group?: string;
+    type?: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document' | 'group';
+    component?: any;
+    enum?: Array<any> | FieldFn;
 }
 
 export interface ISchema {
@@ -46,8 +49,8 @@ export interface ISchema {
 
 export interface IGroups {
     fields: Array<ILayoutFields> | LayoutFields;
-    title: string;
-    orientation: 'vertical' | 'horizontal'
+    title?: string;
+    orientation?: 'vertical' | 'horizontal'
 }
 
 export type Layout = {

@@ -10,11 +10,12 @@ import Button from "./components/input/FormButton";
 import {arraySchema} from "./schemas/Schema3";
 import MainWindow from "./demo/MainWindow";
 import {RenderOption} from "./interfaces/SchemaInterfaces";
+import groupSchema from "./schemas/GroupSchema";
 
 export const COMPONENT_FACTORY = {
     string: TextInputField,
     button: Button,
-    select: SelectInputField,
+    Select: SelectInputField,
 };
 
 class App extends React.Component<any, any> {
@@ -22,11 +23,12 @@ class App extends React.Component<any, any> {
     render() {
         return (
             //<MainWindow/>
-            <FormBuilder onSubmit={this.handleSubmit} schema={newSchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button} renderOption={this.renderOption}/>
+            <FormBuilder onSubmit={this.handleSubmit} schema={groupSchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button} renderOption={this.renderOption} layoutName={'edit'}/>
         );
     }
 
     handleSubmit = (formData: any): void => {
+        console.log(formData, 'submitted')
     }
 
     renderOption: RenderOption = (formSpyProps: FormSpyRenderProps, nextProps: any) => {

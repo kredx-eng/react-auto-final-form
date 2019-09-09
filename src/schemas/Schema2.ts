@@ -4,74 +4,50 @@ import {validators} from "../utils/Validators";
 
 export const newSchema: ISchema = {
     entities: [
-        {   name: 'Basic',
-            fields: {
-                email: {
-                    type: 'string',
-                },
-                name: {
-                    type: 'string',
-                },
-                gender: {
-                    type: 'string',
-                    enum: ['','Male', 'Female'],
-                    component: 'select'
-                },
-                random:{
-                    type: 'entity',
-                    layoutName: 'asdf',
-                    entityName: 'Random',
-                    entityType: 'string',
-                },
-                notEmail: {
-                    type: 'string',
-                },
-                random1:{
-                    type: 'entity',
-                    layoutName: 'asdf',
-                    entityName: 'Random',
-                    entityType: 'string',
-                },
-            },
-            layouts: [
+        {
+            name: "contact",
+            fields: [
                 {
-                    name: 'asdf',
-                    orientation: "vertical",
-                    fields: {
-                        email: {
-                            displayName: 'Email',
-                        },
-                        name: {
-                            displayName: 'Name',
-                        },
-                    },
-                    groups: {
-                        select: {
-                            title: '',
-                            orientation: "horizontal",
-                            fields: {
-                                gender: {
-                                    displayName: 'Gender',
-                                    size: 3,
-                                },
-                                notEmail: {
-                                    displayName: 'notEmail',
-                                    size: 4,
-                                },
-                                random: {
-                                    displayName: 'Random',
-                                    size: 3,
-                                },
-                                random1: {
-                                    displayName: 'Random1',
-                                    size: 3,
-                                },
-                            }
-                        }
-                    }
-
+                    name: "phones",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Phones"
                 },
+                {
+                    name: "phones2",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Custom size",
+                    size: 6
+                },
+                {
+                    name: "phones3",
+                    type: "array",
+                    arrayType: "entity",
+                    entityName: "phone",
+                    displayName: "Custom add text",
+                    addText: 'Add new phone'
+                }
             ]
         },
+        {
+            name: "phone",
+            fields: [
+                {
+                    displayName: 'Area code',
+                    name: "areaCode",
+                    type: "string",
+                    size: 3
+                },
+                {
+                    displayName: 'Number',
+                    name: "number",
+                    type: "string",
+                    size: 9
+                }
+            ]
+        }
     ]
-};
+}

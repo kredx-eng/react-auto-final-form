@@ -1,32 +1,23 @@
 .field {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 5vh;
     margin: 10px;
     align-items: center;
-    max-width: 80vh ;
-    min-width: 20vw;
 }
 
 label {
-    flex: 2;
     margin-right: 2px;
-}
-
-.hidden {
-    display: none;
 }
 
 .textInput {
     border-radius: 10px;
     border-width: 2px;
-    flex: 8;
     border-color: black;
     align-items: center;
     text-align: center;
     height: 3vh;
-    max-width: 50vw;
-    min-width: 10vw;
+    flex-grow: 1;
 }
 
 input[type=number]::-webkit-inner-spin-button,

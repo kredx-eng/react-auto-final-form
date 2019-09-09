@@ -22,12 +22,11 @@ class App extends React.Component<any, any> {
     render() {
         return (
             //<MainWindow/>
-            <FormBuilder onSubmit={this.handleSubmit} schema={arraySchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button} initialValues={{name : 'asdf'}} renderOption={this.renderOption}/>
+            <FormBuilder onSubmit={this.handleSubmit} schema={newSchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button} renderOption={this.renderOption}/>
         );
     }
 
     handleSubmit = (formData: any): void => {
-        console.log(formData, 'called');
     }
 
     renderOption: RenderOption = (formSpyProps: FormSpyRenderProps, nextProps: any) => {

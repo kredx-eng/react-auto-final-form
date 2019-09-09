@@ -12,14 +12,13 @@ interface IProps {
 
 const TextInputField = (props: any) => {
     const {input, meta} = props;
-    console.log(input.name,'field Rerendered')
     if(!!props.hidden) {
         return(
             <div className={'hidden'}>Hidden</div>
         )
     } else {
         return (
-            <div className={'field'} style={{flex: props.size}} key={input.name}>
+            <div className={'field'} key={input.name}>
                 <label className={'label'}>{props.displayName}</label>
                 <input
                     name={input.name}

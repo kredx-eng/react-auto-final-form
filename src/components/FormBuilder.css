@@ -30,7 +30,7 @@
     flex-wrap: wrap;
 }
 
-.array{
+.array {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
@@ -40,4 +40,8 @@
 .array button{
     max-width: 30px;
     max-height: 30px;
+}
+
+.hidden {
+    display: none;
 }

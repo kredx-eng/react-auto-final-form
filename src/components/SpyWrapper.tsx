@@ -27,11 +27,12 @@ class SpyWrapper extends React.Component<IProps, any>{
         return(
             <Field
                 name={`${field.name}`}
-                component={TextInputField}
+                component={field.component ? field.component : TextInputField}
                 displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
                 hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}
                 validate={(value) => (field.validators ? validators.required(value) : undefined)}
                 size={field.size ? FormHelper.metaDataEvaluator(field.size, formData): 10}
+                subscription={this.props.subscription}
             />
         )
     }

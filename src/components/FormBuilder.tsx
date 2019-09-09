@@ -12,7 +12,7 @@ import {
     LayoutFields, RenderOption,
     SimpleObj
 } from "../interfaces/SchemaInterfaces";
-import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-form';
+import {Field, FieldRenderProps, Form, FormProps, FormSpy, FormSpyRenderProps} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
@@ -20,7 +20,7 @@ import {FormHelper} from "../utils/FormHelper";
 import {FieldArray} from 'react-final-form-arrays';
 import arrayMutators from 'final-form-arrays';
 import createDecorator from "final-form-calculate";
-import SpyWrapper from "./spyWrapper";
+import SpyWrapper from "./SpyWrapper";
 
 
 //TODO: Handle size better in each component
@@ -39,8 +39,6 @@ interface IProps {
     allFieldsSubscription?: { [fieldStateName: string]: boolean };
     renderOption?: RenderOption;
 }
-
-let renderCount = 0;
 
 class FormBuilder extends React.Component<IProps, any> {
     formData: any;
@@ -86,7 +84,6 @@ class FormBuilder extends React.Component<IProps, any> {
                         onSubmit={this.handleSubmit}
                         initialValues={this.props.initialValues ? this.props.initialValues : undefined}
                         subscription={this.props.subscription ? this.props.subscription : undefined}
-                        // decorators={[decor]}
                         validateOnBlur={true}
                         mutators={{...arrayMutators}}
                         render={(formProps) => {
@@ -116,10 +113,14 @@ class FormBuilder extends React.Component<IProps, any> {
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
     entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
-        fieldNameStack = !nested ? [] : fieldNameStack;
         this.nested = nested;
         this.isArray = isArray;
-        this.currentArrayName = arrayName;
+        if(fieldNameStack!=[]) {
+            this.currentArrayName = `${fieldNameStack.join('.')}.${arrayName}`
+        } else {
+            this.currentArrayName = `${arrayName}`
+        }
+        fieldNameStack = !nested ? [] : fieldNameStack;
         if (entity.layouts) {
             const {fields, layouts} = entity;
             if (Array.isArray(layouts)) {
@@ -335,65 +336,74 @@ class FormBuilder extends React.Component<IProps, any> {
         }
 
         if(this.fieldPropertyCheck(field)) {
+            field.name = fieldName;
             return (
                 <FormSpy
                     render={(formSpyProps) => {
+                        field = this.fieldFunctionEvaluator(field, formSpyProps);
                         return (
-                            <SpyWrapper
-                                field={field} formData={formSpyProps}
-                                renderOptions={this.props.renderOption ? this.props.renderOption : undefined }
-                                subscription={this.fieldSubscriptionEvaluator(field)}
-                            />
+                            <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                                <SpyWrapper
+                                    field={field} formData={formSpyProps}
+                                    renderOptions={this.props.renderOption ? this.props.renderOption : undefined }
+                                    subscription={this.fieldSubscriptionEvaluator(field)}
+                                />
+                            </div>
                         )
                     }}
                 />
             )
         } else if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
             return (
-                <Field
-                    name={fieldName}
-                    component={this.props.componentFactory[field.component]}
-                    key={`Field_${field.name}_${index}`}
-                    displayName={field.displayName}
-                    validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
-                    enum={field.enum ? field.enum : []}
-                    subscription={this.fieldSubscriptionEvaluator(field)}
-                    hidden={field.hidden ? field.hidden : undefined}
-                />
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                    <Field
+                        name={fieldName}
+                        component={this.props.componentFactory[field.component]}
+                        key={`Field_${field.name}_${index}`}
+                        displayName={field.displayName}
+                        validate={(value) => (field.validators ? validators.required(value) : undefined)}
+                        enum={field.enum ? field.enum : []}
+                        subscription={this.fieldSubscriptionEvaluator(field)}
+                        hidden={field.hidden ? field.hidden : undefined}
+                    />
+                </div>
             )
         } else if (field.component && field.name) {
             return (
-                <Field
-                    name={fieldName}
-                    component={field.component}
-                    key={`Field_${field.name}_${index}`}
-                    displayName={field.displayName}
-                    validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
-                    enum={field.enum ? field.enum : []}
-                    subscription={this.fieldSubscriptionEvaluator(field)}
-                    hidden={field.hidden ? field.hidden : undefined}
-                />
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                    <Field
+                        name={fieldName}
+                        component={field.component}
+                        key={`Field_${field.name}_${index}`}
+                        displayName={field.displayName}
+                        validate={(value) => (field.validators ? validators.required(value) : undefined)}
+                        enum={field.enum ? field.enum : []}
+                        subscription={this.fieldSubscriptionEvaluator(field)}
+                        hidden={field.hidden ? field.hidden : undefined}
+                    />
+                </div>
             )
         } else if (field.type === 'string' || field.type === 'number') {
             return (
-                <Field
-                    name={fieldName}
-                    key={`Field_${field.name}_${index}`}
-                    displayName={field.displayName}
-                    component={TextInputField}
-                    validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
-                    type={field.type}
-                    size={field.size ? FormHelper.metaDataEvaluator(field.size, this.formProps) : 10}
-                    subscription={this.fieldSubscriptionEvaluator(field)}
-                    placeholder={field.displayName}
-                    hidden={field.hidden ? field.hidden : undefined}
-                />
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                    <Field
+                        name={fieldName}
+                        key={`Field_${field.name}_${index}`}
+                        displayName={field.displayName}
+                        component={TextInputField}
+                        validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
+                        type={field.type}
+                        subscription={this.fieldSubscriptionEvaluator(field)}
+                        placeholder={field.displayName}
+                        hidden={field.hidden ? field.hidden : undefined}
+                    />
+                </div>
             )
         } else if (field.type === 'entity') {
             if (!field.entityName) {
                 throw Error('There should be an entityName for schema for a field of type entity');
+            } else if (this.isArray) {
+                throw Error('Currently only type string is only supported in a array of entities')
             }
             let isPresent = false;
             fieldNameStack.push(field.name);
@@ -421,7 +431,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 throw Error('Currently only arrayType of entity is supported')
             }
             return (
-                <div className={'array'}>
+                <div className={'array'} style={this.buildCustomStyle(field)}>
                     <label>{field.displayName}</label>
                     <button type={'button'}
                             onClick={() => this.formProps.form.mutators.push(field.name, undefined)}
@@ -451,14 +461,14 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     //To check whether any field property is of type function
-    fieldPropertyCheck = (field: Fields) => {
+    fieldPropertyCheck = (field: any) => {
         for (let key in field) {
             if(typeof field[key] === 'function') {
                 return true;
             }
         }
         return false
-    }
+    };
 
     fieldSubscriptionEvaluator = (field: IFields) => {
         if(field.subscription) {
@@ -466,6 +476,33 @@ class FormBuilder extends React.Component<IProps, any> {
         } else if (this.props.allFieldsSubscription) {
             return this.props.allFieldsSubscription
         } else return undefined
+    }
+
+    buildCustomStyle = (field: IFields) => {
+        const max = 100;
+        let size: number;
+        let styleObj = {};
+        if(field.hidden) {
+            Object.assign(styleObj, {display: 'hidden'})
+        }
+        if(field.size && typeof field.size !== 'function') {
+            // @ts-ignore
+            size = field.size * 10;
+            let minSize = size/2;
+            if(field.type !== 'array') {
+                Object.assign(styleObj,{flex: field.size, maxWidth: `${size}vw`, flexWrap: 'wrap', minWidth: `${minSize}vw`})
+            } else {
+                Object.assign(styleObj,{flex: field.size, maxWidth: `${size}vw`, flexWrap: 'wrap', minWidth: `${minSize}vw`, width: `${size}vw`})
+            }
+        }
+        return styleObj;
+    };
+
+    fieldFunctionEvaluator = (field: any, formSpyProps: FormSpyRenderProps) => {
+        for(let key in field) {
+            field[key] = FormHelper.metaDataEvaluator(field[key], formSpyProps)
+        }
+        return field;
     }
 
 }

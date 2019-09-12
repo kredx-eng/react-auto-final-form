@@ -14,7 +14,7 @@ import {
     RenderOption,
     SimpleObj
 } from "../interfaces/SchemaInterfaces";
-import {Field, FieldRenderProps, Form, FormProps, FormSpy, FormSpyRenderProps} from 'react-final-form';
+import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-form';
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
@@ -24,7 +24,7 @@ import arrayMutators from 'final-form-arrays';
 import SpyWrapper from "./SpyWrapper";
 
 
-let fieldNameStack: Array<string> = [];
+// let this.fieldNameStack: Array<string> = [];
 
 interface IProps {
     onSubmit: (value: any) => void;
@@ -46,7 +46,8 @@ class FormBuilder extends React.Component<IProps, any> {
     currentEntity: any;
     nested: boolean;
     formProps: any | FormProps;
-    currentArrayName: string | undefined;
+    currentArrayName: string;
+    fieldNameStack: Array<string>;
 
     constructor(props: IProps) {
         super(props);
@@ -55,6 +56,8 @@ class FormBuilder extends React.Component<IProps, any> {
         this.currentEntity = {};
         this.formProps = {};
         this.nested = false;
+        this.fieldNameStack = [];
+        this.currentArrayName = ''
     }
 
     handleSubmit = (submitData: any) => {
@@ -92,7 +95,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                 <form onSubmit={formProps.handleSubmit}>
                                     {entities.map((entity: IEntities) => {
                                         if (entity.name === this.props.entityName) {
-                                            return (this.entityEvaluator(entity, false, false))
+                                            return (this.entityEvaluator(entity))
                                         } else {
                                             return undefined;
                                         }
@@ -111,10 +114,7 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     //Evaluates a single entity, checks for layouts, if layouts isn't present directly maps and renders the fields
-    entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
-        this.nested = nested;
-        this.isArray = isArray;
-        this.currentArrayName = arrayName;
+    entityEvaluator = (entity: IEntities, arrayName?: string) => {
         if (entity.layouts) {
             const {fields, layouts} = entity;
             if (!this.props.layoutName) {
@@ -211,8 +211,8 @@ class FormBuilder extends React.Component<IProps, any> {
                             try {
                                 return checkGroups(field, index);
                             } finally {
-                                if(index === fieldArray.length - 1) {
-                                    fieldNameStack.pop();
+                                if (index === fieldArray.length - 1) {
+                                    this.fieldNameStack.pop();
                                 }
                             }
                         });
@@ -235,8 +235,8 @@ class FormBuilder extends React.Component<IProps, any> {
                             try {
                                 return checkGroups(field, index);
                             } finally {
-                                if(index === fieldArray.length - 1) {
-                                    fieldNameStack.pop();
+                                if (index === fieldArray.length - 1) {
+                                    this.fieldNameStack.pop();
                                 }
                             }
                         })
@@ -257,8 +257,8 @@ class FormBuilder extends React.Component<IProps, any> {
                                 try {
                                     return checkGroups(mergedField, index);
                                 } finally {
-                                    if(index === fields.length - 1) {
-                                        fieldNameStack.pop();
+                                    if (index === fields.length - 1) {
+                                        this.fieldNameStack.pop();
                                     }
                                 }
                             }
@@ -282,8 +282,8 @@ class FormBuilder extends React.Component<IProps, any> {
                         try {
                             return checkGroups(field, index);
                         } finally {
-                            if(index === fieldArray.length - 1) {
-                                fieldNameStack.pop();
+                            if (index === fieldArray.length - 1) {
+                                this.fieldNameStack.pop();
                             }
                         }
                     })
@@ -292,11 +292,11 @@ class FormBuilder extends React.Component<IProps, any> {
         } else {
             if (Array.isArray(fields)) {
                 return fields.map((field, index) => {
-                    try{
+                    try {
                         return this.fieldRenderer(field, index);
                     } finally {
-                        if(index === fields.length - 1) {
-                            fieldNameStack.pop();
+                        if (index === fields.length - 1) {
+                            this.fieldNameStack.pop();
                         }
                     }
                 });
@@ -313,8 +313,8 @@ class FormBuilder extends React.Component<IProps, any> {
                     try {
                         return checkGroups(field, index);
                     } finally {
-                        if(index === fieldArray.length - 1) {
-                            fieldNameStack.pop();
+                        if (index === fieldArray.length - 1) {
+                            this.fieldNameStack.pop();
                         }
                     }
                 });
@@ -346,17 +346,17 @@ class FormBuilder extends React.Component<IProps, any> {
         }
     };
 
-    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string, index?: number) => {
+    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string) => {
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
-                    <div className={'verticalLayout'} key={layoutName}>
+                    <div className={'verticalLayout'} key={`${layoutName}`}>
                         {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
             } else if (orientation === 'horizontal') {
                 return (
-                    <div className={'horizontalLayout'} key={layoutName}>
+                    <div className={'horizontalLayout'} key={`${layoutName}`}>
                         {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
@@ -368,10 +368,8 @@ class FormBuilder extends React.Component<IProps, any> {
         let fieldName = '';
         //TODO: Add functionality for document upload
 
-        if(fieldNameStack.length !== 0) {
-            fieldName = `${fieldNameStack.join('.')}.${field.name}`
-        } else if (this.isArray && this.currentArrayName) {
-            fieldName = (fieldNameStack.length !== 0) ? `${fieldNameStack.join('.')}.${this.currentArrayName}.${field.name}` : `${this.currentArrayName}.${field.name}`;
+        if (this.fieldNameStack.length !== 0) {
+            fieldName = `${this.fieldNameStack.join('.')}.${field.name}`
         } else {
             fieldName = field.name
         }
@@ -432,11 +430,8 @@ class FormBuilder extends React.Component<IProps, any> {
             if (!field.entityName) {
                 throw Error('There should be an entityName for schema for a field of type entity');
             }
-            // else if (this.isArray) {
-            //     throw Error('Currently only type string is only supported in a array of entities')
-            // }
             let isPresent = false;
-            fieldNameStack.push(field.name);
+            this.fieldNameStack.push(field.name);
             for (let entity of this.props.schema.entities) {
                 if (entity.name === field.entityName) {
                     this.currentEntity = entity;
@@ -444,7 +439,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     return (
                         <label>
                             {field.displayName}
-                            {this.entityEvaluator(entity, true, false)}
+                            {this.entityEvaluator(entity)}
                         </label>
                     );
                 }
@@ -460,7 +455,7 @@ class FormBuilder extends React.Component<IProps, any> {
             } else if (field.arrayType !== 'entity') {
                 throw Error('Currently only arrayType of entity is supported')
             }
-            // let mergedFieldName = (fieldNameStack !== []) ? `${fieldNameStack.join('.')}.${field.name}` : field.name;
+            // let mergedFieldName = (this.fieldNameStack !== []) ? `${this.fieldNameStack.join('.')}.${field.name}` : field.name;
             return (
                 <div className={'array'} style={this.buildCustomStyle(field)} key={fieldName}>
                     <label>{field.displayName}</label>
@@ -468,7 +463,13 @@ class FormBuilder extends React.Component<IProps, any> {
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
                             return fieldArrayProps.fields.map((name: any) => {
-                                return (this.handleArray(fieldArrayProps, field.entityName, name));
+                                try {
+                                    this.currentArrayName = name;
+                                    this.fieldNameStack.push(this.currentArrayName);
+                                    return (this.handleArray(fieldArrayProps, field.entityName, name));
+                                } finally {
+                                    this.fieldNameStack.pop();
+                                }
                             })
                         }}
                     />
@@ -489,7 +490,7 @@ class FormBuilder extends React.Component<IProps, any> {
                 this.currentEntity = entity;
             }
         }
-        return (this.entityEvaluator(this.currentEntity, false, true, arrayName));
+        return (this.entityEvaluator(this.currentEntity, arrayName));
     };
 
     //To check whether any field property is of type function

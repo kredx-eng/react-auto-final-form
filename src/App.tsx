@@ -32,7 +32,6 @@ class App extends React.Component<any, any> {
                 bottomBar={Button}
                 renderOption={this.renderOption}
                 layoutName={'edit'}
-                initialValues={{name: 'asdf'}}
             />
         );
     }

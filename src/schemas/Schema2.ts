@@ -1,6 +1,4 @@
 import {ISchema} from "../interfaces/SchemaInterfaces";
-import TextInputField from "../components/input/TextInputField";
-import {validators} from "../utils/Validators";
 
 export const newSchema: ISchema = {
     entities: [
@@ -20,13 +18,12 @@ export const newSchema: ISchema = {
                     arrayType: "entity",
                     entityName: "phone",
                     displayName: "Custom size",
-                    size: 6
+                    size: 6,
                 },
                 {
                     name: "phones3",
-                    type: "array",
-                    arrayType: "entity",
-                    entityName: "phone",
+                    type: "entity",
+                    entityName: "number",
                     displayName: "Custom add text",
                     addText: 'Add new phone'
                 }
@@ -39,15 +36,50 @@ export const newSchema: ISchema = {
                     displayName: 'Area code',
                     name: "areaCode",
                     type: "string",
-                    size: 3
+                    size: 3,
+                    validators: 'required'
                 },
                 {
                     displayName: 'Number',
                     name: "number",
                     type: "string",
-                    size: 9
+                    size: 9,
+                    validators: 'required',
+                }
+            ],
+            layouts: [
+                {
+                    name: 'edit',
+                    orientation: 'horizontal',
+                    fields: {
+                        areaCode: {
+                            displayName: 'Area code',
+                            type: "string",
+                            size: 3
+                        },
+                        number: {
+                            displayName: 'Number',
+                            type: "string",
+                            size: 9
+                        }
+                    }
                 }
             ]
+        },
+        {
+            name: 'number',
+            fields: {
+                number2: {
+                    displayName: 'Number2',
+                    type: 'string'
+                },
+                number1: {
+                    displayName: 'Number1',
+                    type: 'array',
+                    entityName: "phone",
+                    arrayType: 'entity'
+                },
+            }
         }
     ]
-}
+};

@@ -7,7 +7,7 @@ import {Form, Field, FormSpyRenderProps} from 'react-final-form'
 import TextInputField from "./components/input/TextInputField";
 import SelectInputField from "./components/input/SelectInputField";
 import Button from "./components/input/FormButton";
-import {arraySchema} from "./schemas/Schema3";
+import {functionSchema} from "./schemas/Schema3";
 import MainWindow from "./demo/MainWindow";
 import {RenderOption} from "./interfaces/SchemaInterfaces";
 import groupSchema from "./schemas/GroupSchema";
@@ -23,13 +23,24 @@ class App extends React.Component<any, any> {
     render() {
         return (
             //<MainWindow/>
-            <FormBuilder onSubmit={this.handleSubmit} schema={groupSchema} componentFactory={COMPONENT_FACTORY} entityName = {"contact"} subscription={{submitting: true}} bottomBar={Button} renderOption={this.renderOption} layoutName={'edit'}/>
+            <FormBuilder
+                onSubmit={this.handleSubmit}
+                schema={newSchema}
+                componentFactory={COMPONENT_FACTORY}
+                entityName = {"contact"}
+                subscription={{submitting: true}}
+                bottomBar={Button}
+                renderOption={this.renderOption}
+                layoutName={'edit'}
+                initialValues={{name: 'asdf'}}
+            />
         );
     }
 
     handleSubmit = (formData: any): void => {
-        console.log(formData, 'submitted')
-    }
+        console.log(formData, 'submitted');
+        alert(JSON.stringify(formData, null, '\t'));
+    };
 
     renderOption: RenderOption = (formSpyProps: FormSpyRenderProps, nextProps: any) => {
         const {formData} = nextProps;

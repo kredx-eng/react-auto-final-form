@@ -46,12 +46,12 @@ const groupSchema: ISchema = {
                                     {
                                         name: "propertyGrouped1",
                                         size: 3,
-                                        displayName: 'propertyGrouped1',
+                                        displayName: '',
                                         type: "string",
                                         component: "Select",
                                         enum: ['option1', "option2"],
                                     },
-                                    { name: "propertyGrouped2", size: 9, displayName: 'propertyGrouped2' },
+                                    { name: "propertyGrouped2", size: 9, displayName: '' },
                                 ]
                             }
                         }

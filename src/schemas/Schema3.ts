@@ -1,7 +1,7 @@
 import {ISchema} from "../interfaces/SchemaInterfaces";
 import {validators} from "../utils/Validators";
 
-export const arraySchema: ISchema = {
+export const functionSchema: ISchema = {
     entities: [
         {
             name: "contact",
@@ -39,17 +39,18 @@ export const arraySchema: ISchema = {
         {
             name: "email",
             fields: [
-                {
-                    name: "emailType",
-                    displayName: "Type",
-                    type: "string"
-                },
+
                 {
                     name: "address",
                     displayName: "Address",
                     type: "entity",
                     entityName: "notAdress"
-                }
+                },
+                {
+                    name: "emailType",
+                    displayName: "Type",
+                    type: "string"
+                },
             ]
         }, {
             name: 'notAdress',

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Fields, IFields, RenderOption, SimpleObj} from "../interfaces/SchemaInterfaces";
+import {ComponentFactory, Fields, IFields, RenderOption, SimpleObj} from "../interfaces/SchemaInterfaces";
 import {Field, FormSpy, FormSpyRenderProps} from "react-final-form";
 import TextInputField from "./input/TextInputField";
 import {FormHelper} from "../utils/FormHelper";
@@ -10,6 +10,7 @@ interface IProps {
     renderOptions?: RenderOption;
     formData: FormSpyRenderProps;
     subscription: { [fieldStateName: string]: boolean } | undefined;
+    componentFactory?: ComponentFactory;
 }
 
 
@@ -27,14 +28,23 @@ class SpyWrapper extends React.Component<IProps, any>{
         return(
             <Field
                 name={`${field.name}`}
-                component={field.component ? field.component : TextInputField}
+                component={this.handleComponent(field)}
                 displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
                 hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}
                 validate={(value) => (field.validators ? validators.required(value) : undefined)}
                 size={field.size ? FormHelper.metaDataEvaluator(field.size, formData): 10}
                 subscription={this.props.subscription}
+                key={field.name}
             />
         )
+    }
+
+    handleComponent = (field: IFields) => {
+        if(this.props.componentFactory && field.component && this.props.componentFactory.hasOwnProperty(field.component)) {
+            return this.props.componentFactory[field.component];
+        } else {
+            return TextInputField;
+        }
     }
 }
 

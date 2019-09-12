@@ -4,7 +4,8 @@ import {
     Fields,
     Group,
     IEntities,
-    IFields, IGroups,
+    IFields,
+    IGroups,
     ILayout,
     ILayoutFields,
     ISchema,
@@ -77,7 +78,7 @@ class FormBuilder extends React.Component<IProps, any> {
             const {entities} = this.props.schema;
             this.checkSchema();
             return (
-                <div className={'container'}>
+                <div className={'container'} key={'container'}>
                     <Form
                         onSubmit={this.handleSubmit}
                         initialValues={this.props.initialValues ? this.props.initialValues : undefined}
@@ -96,7 +97,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                             return undefined;
                                         }
                                     })}
-                                    <Field name={'bottomBar'} component={this.props.bottomBar}/>
+                                    <Field name={'bottomBar'} component={this.props.bottomBar} key={'bottomBar'}/>
                                 </form>
                             );
                         }}
@@ -113,12 +114,7 @@ class FormBuilder extends React.Component<IProps, any> {
     entityEvaluator = (entity: IEntities, nested: boolean, isArray: boolean, arrayName?: string) => {
         this.nested = nested;
         this.isArray = isArray;
-        if (fieldNameStack != []) {
-            this.currentArrayName = `${fieldNameStack.join('.')}.${arrayName}`
-        } else {
-            this.currentArrayName = `${arrayName}`
-        }
-        fieldNameStack = !nested ? [] : fieldNameStack;
+        this.currentArrayName = arrayName;
         if (entity.layouts) {
             const {fields, layouts} = entity;
             if (!this.props.layoutName) {
@@ -178,6 +174,22 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     fieldEvaluator = (fields: Array<IFields> | Fields, layoutFields?: Array<ILayoutFields> | LayoutFields, groups?: Group) => {
+        const checkGroups = (field: IFields, index: number) => {
+            if (field.group && groups) {
+                if (groups.hasOwnProperty(field.group)) {
+                    return (
+                        <label>
+                            {field.displayName}
+                            {this.groupEvaluator(groups[field.group], fields, index)}
+                        </label>
+                    )
+                } else {
+                    throw Error("The given group name doesn't exist")
+                }
+            } else {
+                return this.fieldRenderer(field, index);
+            }
+        };
         if (layoutFields) {
             if (Array.isArray(layoutFields)) {
                 // Field of type Array or Object both are handled as array in each cases, every block has its own variable fieldArray for block scoping
@@ -196,14 +208,12 @@ class FormBuilder extends React.Component<IProps, any> {
                     }
                     if (fieldArray.length > 0) {
                         return fieldArray.map((field, index) => {
-                            if(field.group && groups) {
-                                if(groups.hasOwnProperty(field.group)) {
-                                    return this.groupEvaluator(groups[field.group], fields)
-                                } else {
-                                    throw Error("The given group name doesn't exist")
+                            try {
+                                return checkGroups(field, index);
+                            } finally {
+                                if(index === fieldArray.length - 1) {
+                                    fieldNameStack.pop();
                                 }
-                            } else {
-                                return this.fieldRenderer(field, index);
                             }
                         });
                     }
@@ -222,14 +232,12 @@ class FormBuilder extends React.Component<IProps, any> {
                             return undefined;
                         }
                         return fieldArray.map((field, index) => {
-                            if(field.group && groups) {
-                                if(groups.hasOwnProperty(field.group)) {
-                                    return this.groupEvaluator(groups[field.group], fields)
-                                } else {
-                                    throw Error("The given group name doesn't exist")
+                            try {
+                                return checkGroups(field, index);
+                            } finally {
+                                if(index === fieldArray.length - 1) {
+                                    fieldNameStack.pop();
                                 }
-                            } else {
-                                return this.fieldRenderer(field, index);
                             }
                         })
                     }
@@ -246,14 +254,12 @@ class FormBuilder extends React.Component<IProps, any> {
                                     ...layoutFields[field.name],
                                     ...field
                                 };
-                                if(field.group && groups) {
-                                    if(groups.hasOwnProperty(field.group)) {
-                                        return this.groupEvaluator(groups[field.group], fields)
-                                    } else {
-                                        throw Error("The given group name doesn't exist")
+                                try {
+                                    return checkGroups(mergedField, index);
+                                } finally {
+                                    if(index === fields.length - 1) {
+                                        fieldNameStack.pop();
                                     }
-                                } else {
-                                    return this.fieldRenderer(mergedField, index);
                                 }
                             }
                         }
@@ -273,14 +279,12 @@ class FormBuilder extends React.Component<IProps, any> {
                         }
                     }
                     return fieldArray.map((field, index) => {
-                        if(field.group && groups) {
-                            if(groups.hasOwnProperty(field.group)) {
-                                return this.groupEvaluator(groups[field.group], fields)
-                            } else {
-                                throw Error("The given group name doesn't exist")
+                        try {
+                            return checkGroups(field, index);
+                        } finally {
+                            if(index === fieldArray.length - 1) {
+                                fieldNameStack.pop();
                             }
-                        } else {
-                            return this.fieldRenderer(field, index);
                         }
                     })
                 }
@@ -288,7 +292,13 @@ class FormBuilder extends React.Component<IProps, any> {
         } else {
             if (Array.isArray(fields)) {
                 return fields.map((field, index) => {
-                    return this.fieldRenderer(field, index);
+                    try{
+                        return this.fieldRenderer(field, index);
+                    } finally {
+                        if(index === fields.length - 1) {
+                            fieldNameStack.pop();
+                        }
+                    }
                 });
             } else {
                 let fieldArray = [];
@@ -300,46 +310,43 @@ class FormBuilder extends React.Component<IProps, any> {
                     fieldArray.push(mergedField);
                 }
                 return fieldArray.map((field, index) => {
-                    if(field.group && groups) {
-                        if(groups.hasOwnProperty(field.group)) {
-                            return this.groupEvaluator(groups[field.group], fields)
-                        } else {
-                            throw Error("The given group name doesn't exist")
+                    try {
+                        return checkGroups(field, index);
+                    } finally {
+                        if(index === fieldArray.length - 1) {
+                            fieldNameStack.pop();
                         }
-                    } else {
-                        return this.fieldRenderer(field, index);
                     }
                 });
             }
         }
     };
 
-    groupEvaluator = (group: IGroups, fields: Fields | Array<IFields>) => {
-        //TODO: To be handled differently
-            if (group.orientation) {
-                if (group.orientation === 'vertical') {
-                    return (
-                        <div className={'verticalGroup'}>
-                            {this.fieldEvaluator(fields, group.fields)}
-                        </div>
-                    )
-                } else if (group.orientation === 'horizontal') {
-                    return (
-                        <div className={'horizontalGroup'}>
-                            {this.fieldEvaluator(fields, group.fields)}
-                        </div>
-                    )
-                }
-            } else {
+    groupEvaluator = (group: IGroups, fields: Fields | Array<IFields>, index?: number) => {
+        if (group.orientation) {
+            if (group.orientation === 'vertical') {
                 return (
-                    <div className={'verticalGroup'}>
+                    <div className={'verticalGroup'} key={`${group.orientation}.${index}`}>
+                        {this.fieldEvaluator(fields, group.fields)}
+                    </div>
+                )
+            } else if (group.orientation === 'horizontal') {
+                return (
+                    <div className={'horizontalGroup'} key={`${group.orientation}.${index}`}>
                         {this.fieldEvaluator(fields, group.fields)}
                     </div>
                 )
             }
+        } else {
+            return (
+                <div className={'verticalGroup'} key={`verticalGroup.${index}`}>
+                    {this.fieldEvaluator(fields, group.fields)}
+                </div>
+            )
+        }
     };
 
-    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string) => {
+    handleOrientation = (orientation: any, layouts: Layout | Array<ILayout>, fields: Array<IFields> | Fields, layoutName?: string, index?: number) => {
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
@@ -361,15 +368,12 @@ class FormBuilder extends React.Component<IProps, any> {
         let fieldName = '';
         //TODO: Add functionality for document upload
 
-        if (this.currentEntity !== {} && this.nested) {
-            if (index === this.currentEntity.fields.length - 1) {
-                this.nested = false;
-            }
+        if(fieldNameStack.length !== 0) {
             fieldName = `${fieldNameStack.join('.')}.${field.name}`
-        } else if (this.currentArrayName && this.isArray) {
-            fieldName = `${this.currentArrayName}.${field.name}`;
+        } else if (this.isArray && this.currentArrayName) {
+            fieldName = (fieldNameStack.length !== 0) ? `${fieldNameStack.join('.')}.${this.currentArrayName}.${field.name}` : `${this.currentArrayName}.${field.name}`;
         } else {
-            fieldName = field.name;
+            fieldName = field.name
         }
 
         if (this.fieldPropertyCheck(field)) {
@@ -377,13 +381,14 @@ class FormBuilder extends React.Component<IProps, any> {
             return (
                 <FormSpy
                     render={(formSpyProps) => {
-                        field = this.fieldFunctionEvaluator(field, formSpyProps);
                         return (
-                            <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                            <div className={'fieldContainer'} style={this.buildCustomStyle(field)} key={fieldName}>
                                 <SpyWrapper
                                     field={field} formData={formSpyProps}
                                     renderOptions={this.props.renderOption ? this.props.renderOption : undefined}
                                     subscription={this.fieldSubscriptionEvaluator(field)}
+                                    componentFactory={this.props.componentFactory ? this.props.componentFactory : undefined}
+                                    key={fieldName}
                                 />
                             </div>
                         )
@@ -392,11 +397,11 @@ class FormBuilder extends React.Component<IProps, any> {
             )
         } else if (this.props.componentFactory && this.props.componentFactory.hasOwnProperty(field.component)) {
             return (
-                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)} key={fieldName}>
                     <Field
                         name={fieldName}
                         component={this.props.componentFactory[field.component]}
-                        key={`Field_${field.name}_${index}`}
+                        key={fieldName}
                         displayName={field.displayName}
                         validate={(value) => (field.validators ? validators.required(value) : undefined)}
                         enum={field.enum ? field.enum : []}
@@ -405,27 +410,14 @@ class FormBuilder extends React.Component<IProps, any> {
                     />
                 </div>
             )
-        } else if (field.component && field.name) {
-            return (
-                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
-                    <Field
-                        name={fieldName}
-                        component={field.component}
-                        key={`Field_${field.name}_${index}`}
-                        displayName={field.displayName}
-                        validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                        enum={field.enum ? field.enum : []}
-                        subscription={this.fieldSubscriptionEvaluator(field)}
-                        hidden={field.hidden ? field.hidden : undefined}
-                    />
-                </div>
-            )
+        } else if (field.component && this.props.componentFactory && !this.props.componentFactory.hasOwnProperty(field.component)) {
+            throw Error(`The given component in the field with name '${field.name}' doesn't exist in given componentFactory`)
         } else if (field.type === 'string' || field.type === 'number') {
             return (
-                <div className={'fieldContainer'} style={this.buildCustomStyle(field)}>
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)} key={fieldName}>
                     <Field
                         name={fieldName}
-                        key={`Field_${field.name}_${index}`}
+                        key={fieldName}
                         displayName={field.displayName}
                         component={TextInputField}
                         validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
@@ -439,9 +431,10 @@ class FormBuilder extends React.Component<IProps, any> {
         } else if (field.type === 'entity') {
             if (!field.entityName) {
                 throw Error('There should be an entityName for schema for a field of type entity');
-            } else if (this.isArray) {
-                throw Error('Currently only type string is only supported in a array of entities')
             }
+            // else if (this.isArray) {
+            //     throw Error('Currently only type string is only supported in a array of entities')
+            // }
             let isPresent = false;
             fieldNameStack.push(field.name);
             for (let entity of this.props.schema.entities) {
@@ -467,14 +460,10 @@ class FormBuilder extends React.Component<IProps, any> {
             } else if (field.arrayType !== 'entity') {
                 throw Error('Currently only arrayType of entity is supported')
             }
+            // let mergedFieldName = (fieldNameStack !== []) ? `${fieldNameStack.join('.')}.${field.name}` : field.name;
             return (
-                <div className={'array'} style={this.buildCustomStyle(field)}>
+                <div className={'array'} style={this.buildCustomStyle(field)} key={fieldName}>
                     <label>{field.displayName}</label>
-                    <button type={'button'}
-                            onClick={() => this.formProps.form.mutators.push(field.name, undefined)}
-                    >
-                        {field.addText ? field.addText : 'Add +'}
-                    </button>
                     <FieldArray
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
@@ -483,12 +472,18 @@ class FormBuilder extends React.Component<IProps, any> {
                             })
                         }}
                     />
+                    <button type={'button'}
+                            onClick={() => this.formProps.form.mutators.push(fieldName, undefined)}
+                    >
+                        {field.addText ? field.addText : 'Add +'}
+                    </button>
                 </div>
             )
         }
     };
 
     handleArray = (fieldArrayProps: any, entityName: string, arrayName: string) => {
+        this.currentArrayName = arrayName;
         for (let entity of this.props.schema.entities) {
             if (entity.name === entityName) {
                 this.currentEntity = entity;
@@ -513,7 +508,7 @@ class FormBuilder extends React.Component<IProps, any> {
         } else if (this.props.allFieldsSubscription) {
             return this.props.allFieldsSubscription
         } else return undefined
-    }
+    };
 
     //Builds style object dependent upon the size property passed in the field
     buildCustomStyle = (field: IFields) => {
@@ -524,13 +519,13 @@ class FormBuilder extends React.Component<IProps, any> {
         }
         if (field.size && typeof field.size !== 'function') {
             size = field.size * 10;
-            let minSize = size / 2;
+            let minSize = size / 4;
             if (field.type !== 'array') {
                 Object.assign(styleObj, {
                     flex: field.size,
                     maxWidth: `${size}vw`,
                     flexWrap: 'wrap',
-                    minWidth: `${minSize}vw`
+                    // minWidth: `${minSize}vw`
                 })
             } else {
                 Object.assign(styleObj, {
@@ -543,7 +538,7 @@ class FormBuilder extends React.Component<IProps, any> {
             }
         } else {
             size = 100;
-            let minSize = size / 2;
+            let minSize = size / 4;
             Object.assign(styleObj, {
                 flex: size / 10,
                 maxWidth: `${size}vw`,
@@ -554,14 +549,6 @@ class FormBuilder extends React.Component<IProps, any> {
         }
         return styleObj;
     };
-
-    //Evaluates all the properties in the field when the type of field property is function
-    fieldFunctionEvaluator = (field: any, formSpyProps: FormSpyRenderProps) => {
-        for (let key in field) {
-            field[key] = FormHelper.metaDataEvaluator(field[key], formSpyProps)
-        }
-        return field;
-    }
 
 }
 

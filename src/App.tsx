@@ -28,11 +28,10 @@ class App extends React.Component<any, any> {
                 schema={newSchema}
                 componentFactory={COMPONENT_FACTORY}
                 entityName = {"contact"}
-                subscription={{submitting: true}}
+                subscription={{submitting: true,values: true}}
                 bottomBar={Button}
                 renderOption={this.renderOption}
                 layoutName={'edit'}
-                initialValues={{name: 'asdf'}}
             />
         );
     }

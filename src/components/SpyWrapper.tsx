@@ -34,7 +34,6 @@ class SpyWrapper extends React.Component<IProps, any>{
                 validate={(value) => (field.validators ? validators.required(value) : undefined)}
                 size={field.size ? FormHelper.metaDataEvaluator(field.size, formData): 10}
                 subscription={this.props.subscription}
-                key={field.name}
             />
         )
     }

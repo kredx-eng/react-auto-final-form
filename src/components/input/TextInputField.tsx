@@ -11,13 +11,8 @@ interface IProps {
 
 const TextInputField = (props: any) => {
     const {input, meta} = props;
-    if(!!props.hidden) {
-        return(
-            <div className={'hidden'}>Hidden</div>
-        )
-    } else {
         return (
-            <div className={'field'} key={input.name}>
+            <div className={'field'} key={`field.${input.name}`}>
                 <label className={'label'}>{props.displayName}</label>
                 <input
                     name={input.name}
@@ -33,7 +28,7 @@ const TextInputField = (props: any) => {
                     {(Array.isArray(meta.error)) ? (meta.error[meta.error.length - 1]) : meta.error}
                 </p>}
             </div>
-        )}
+        )
 };
 
 export default TextInputField;

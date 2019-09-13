@@ -69,15 +69,16 @@ export const newSchema: ISchema = {
         {
             name: 'number',
             fields: {
-                number2: {
-                    displayName: 'Number2',
-                    type: 'string'
-                },
                 number1: {
                     displayName: 'Number1',
                     type: 'array',
                     entityName: "phone",
                     arrayType: 'entity'
+                },
+                date: {
+                    displayName: 'Date',
+                    type: 'date',
+                    format: "ISO"
                 },
             }
         }

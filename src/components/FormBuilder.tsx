@@ -18,13 +18,33 @@ import {Field, FieldRenderProps, Form, FormProps, FormSpy} from 'react-final-for
 import TextInputField from "./input/TextInputField";
 import {composeValidator, validators} from "../utils/Validators";
 import './FormBuilder.css';
-import {FormHelper} from "../utils/FormHelper";
 import {FieldArray} from 'react-final-form-arrays';
 import arrayMutators from 'final-form-arrays';
 import SpyWrapper from "./SpyWrapper";
+import DateInput from "./input/DateInput";
 
 
-// let this.fieldNameStack: Array<string> = [];
+const FIELD_TYPE = ['string', 'array', 'entity', 'document', 'group', 'date'];
+
+const dateMutator = (args: string, state: any, utils: any) => {
+    const setDate = (value: string) => {
+        const date = value.split('-');
+        const d = new Date(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
+        if (args[1]) {
+            switch (args[1]) {
+                case 'epoch':
+                    return d.getTime();
+                case 'UTC':
+                    return d.toUTCString();
+                case 'ISO':
+                    return d.toISOString();
+                default:
+                    return d.getTime()
+            }
+        } else return d.toDateString();
+    };
+    utils.changeValue(state, args[0], (value: any) => setDate(value));
+};
 
 interface IProps {
     onSubmit: (value: any) => void;
@@ -46,7 +66,6 @@ class FormBuilder extends React.Component<IProps, any> {
     currentEntity: any;
     nested: boolean;
     formProps: any | FormProps;
-    currentArrayName: string;
     fieldNameStack: Array<string>;
 
     constructor(props: IProps) {
@@ -57,7 +76,6 @@ class FormBuilder extends React.Component<IProps, any> {
         this.formProps = {};
         this.nested = false;
         this.fieldNameStack = [];
-        this.currentArrayName = ''
     }
 
     handleSubmit = (submitData: any) => {
@@ -87,10 +105,9 @@ class FormBuilder extends React.Component<IProps, any> {
                         initialValues={this.props.initialValues ? this.props.initialValues : undefined}
                         subscription={this.props.subscription ? this.props.subscription : undefined}
                         validateOnBlur={true}
-                        mutators={{...arrayMutators}}
+                        mutators={{...arrayMutators, date: dateMutator}}
                         render={(formProps) => {
                             this.formProps = formProps;
-                            FormHelper.updateFormState(formProps);
                             return (
                                 <form onSubmit={formProps.handleSubmit}>
                                     {entities.map((entity: IEntities) => {
@@ -208,6 +225,7 @@ class FormBuilder extends React.Component<IProps, any> {
                     }
                     if (fieldArray.length > 0) {
                         return fieldArray.map((field, index) => {
+                            //try and finally used here to handle the name stack and popping the stack after the evaluation of the entity fields
                             try {
                                 return checkGroups(field, index);
                             } finally {
@@ -215,6 +233,7 @@ class FormBuilder extends React.Component<IProps, any> {
                                     this.fieldNameStack.pop();
                                 }
                             }
+//TODO: Find a better way to handle the above scenario
                         });
                     }
                 } else {
@@ -350,13 +369,13 @@ class FormBuilder extends React.Component<IProps, any> {
         if (layoutName) {
             if (orientation === 'vertical') {
                 return (
-                    <div className={'verticalLayout'} key={`${layoutName}`}>
+                    <div className={'verticalLayout'} key={`${this.fieldNameStack.join()}`}>
                         {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
             } else if (orientation === 'horizontal') {
                 return (
-                    <div className={'horizontalLayout'} key={`${layoutName}`}>
+                    <div className={'horizontalLayout'} key={`${this.fieldNameStack.join()}`}>
                         {this.layoutEvaluator(layoutName, layouts, fields)}
                     </div>
                 )
@@ -373,6 +392,11 @@ class FormBuilder extends React.Component<IProps, any> {
         } else {
             fieldName = field.name
         }
+
+        if (!FIELD_TYPE.includes(field.type)) {
+            throw Error(`The provided field type for the field name "${field.name}" is not supported`)
+        }
+
 
         if (this.fieldPropertyCheck(field)) {
             field.name = fieldName;
@@ -447,6 +471,24 @@ class FormBuilder extends React.Component<IProps, any> {
             if (!isPresent) {
                 throw Error("The given entityName of the field doesn't match with the entities in the schema");
             }
+        } else if (field.type === 'date') {
+            return (
+                <div className={'fieldContainer'} style={this.buildCustomStyle(field)} key={fieldName}>
+                    <Field
+                        name={fieldName}
+                        key={fieldName}
+                        displayName={field.displayName}
+                        component={(field.component) ? field.component : DateInput}
+                        validate={(value) => (field.validators ? composeValidator(field.validators, value) : undefined)}
+                        type={field.type}
+                        subscription={this.fieldSubscriptionEvaluator(field)}
+                        placeholder={field.displayName}
+                        hidden={field.hidden ? field.hidden : undefined}
+                        formatting={field.format ? field.format : undefined}
+                        mutators={this.formProps.form.mutators}
+                    />
+                </div>
+            )
         } else if (field.type === 'array') {
             if (!field.arrayType) {
                 throw Error('There should be an arrayType for a field of type array')
@@ -455,7 +497,6 @@ class FormBuilder extends React.Component<IProps, any> {
             } else if (field.arrayType !== 'entity') {
                 throw Error('Currently only arrayType of entity is supported')
             }
-            // let mergedFieldName = (this.fieldNameStack !== []) ? `${this.fieldNameStack.join('.')}.${field.name}` : field.name;
             return (
                 <div className={'array'} style={this.buildCustomStyle(field)} key={fieldName}>
                     <label>{field.displayName}</label>
@@ -463,13 +504,16 @@ class FormBuilder extends React.Component<IProps, any> {
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
                             return fieldArrayProps.fields.map((name: any) => {
+
+//try and finally used here to push and pop the name of array from the name stack, pops when the array evaluation is complete
+
                                 try {
-                                    this.currentArrayName = name;
-                                    this.fieldNameStack.push(this.currentArrayName);
+                                    this.fieldNameStack.push(name);
                                     return (this.handleArray(fieldArrayProps, field.entityName, name));
                                 } finally {
                                     this.fieldNameStack.pop();
                                 }
+                                //TODO: Find a better way to handle the above case
                             })
                         }}
                     />
@@ -484,7 +528,6 @@ class FormBuilder extends React.Component<IProps, any> {
     };
 
     handleArray = (fieldArrayProps: any, entityName: string, arrayName: string) => {
-        this.currentArrayName = arrayName;
         for (let entity of this.props.schema.entities) {
             if (entity.name === entityName) {
                 this.currentEntity = entity;

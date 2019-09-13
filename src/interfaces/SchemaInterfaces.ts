@@ -3,19 +3,19 @@ import {FormRenderProps, FormSpyRenderProps} from "react-final-form";
 
 export interface IFields extends ILayoutFields {
     name?: string ;
-    type: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document' | 'group';
+    type: 'array' | 'entity' | 'string' | 'number' | 'document' | 'group' | 'date';
     component?: any;
     validators?: Array< Validators | string > | Validators | string;
     arrayType?: 'entity';
     layoutName?: string;
     entityName?: string | FieldFn;
-    format?: string;
     addText?: string;
     options?: Array<Options>;
     readonly?: boolean;
     subscriptions?: {[name: string]: boolean};
     hidden?: boolean | FieldFn;
     subscription?: { [fieldStateName: string]: boolean };
+    format?: 'ISO' | 'epoch' | 'UTC'
 }
 
 export interface IEntities {
@@ -38,9 +38,10 @@ export interface ILayoutFields {
     placeholder?: string | FieldFn;
     name?: string;
     group?: string;
-    type?: 'array' | 'entity' | 'string' | 'number' | FieldFn | 'document' | 'group';
+    type?: 'array' | 'entity' | 'string' | 'number' | 'document' | 'group' | 'date';
     component?: any;
     enum?: Array<any> | FieldFn;
+    format?: 'ISO' | 'epoch' | 'UTC'
 }
 
 export interface ISchema {

@@ -46,6 +46,7 @@ const dateMutator = (args: string, state: any, utils: any) => {
     utils.changeValue(state, args[0], (value: any) => setDate(value));
 };
 
+
 interface IProps {
     onSubmit: (value: any) => void;
     schema: ISchema;
@@ -504,7 +505,7 @@ class FormBuilder extends React.Component<IProps, any> {
                         name={fieldName}
                         render={(fieldArrayProps: any) => {
                             return fieldArrayProps.fields.map((name: any) => {
-
+                              
 //try and finally used here to push and pop the name of array from the name stack, pops when the array evaluation is complete
 
                                 try {

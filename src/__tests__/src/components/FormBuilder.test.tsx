@@ -18,7 +18,15 @@ const submit = jest.fn();
 describe('render tests', () => {
     let wrapper: any;
     beforeEach(() => {
-        wrapper = render(<FormBuilder schema={newSchema} onSubmit={submit} componentFactory={COMPONENT_FACTORY}/>);
+        wrapper = render(<FormBuilder
+            onSubmit={submit}
+            schema={newSchema}
+            componentFactory={COMPONENT_FACTORY}
+            entityName = {"contact"}
+            subscription={{submitting: true,values: true}}
+            bottomBar={Button}
+            layoutName={'edit'}
+        />);
     });
     it('should match snapshot', () => {
         expect(wrapper).toMatchSnapshot();
@@ -28,7 +36,14 @@ describe('render tests', () => {
 describe('mount tests', () => {
     let wrapper: any;
     beforeEach(() => {
-        wrapper = mount(<FormBuilder schema={newSchema} onSubmit={submit}/>);
+        wrapper = mount(<FormBuilder
+            onSubmit={submit}
+            schema={newSchema}
+            entityName = {"contact"}
+            subscription={{submitting: true,values: true}}
+            bottomBar={Button}
+            layoutName={'edit'}
+        />);
     });
 
     it('should invoke submit on submit', () => {

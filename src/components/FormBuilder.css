@@ -1,0 +1,46 @@
+.verticalLayout {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.horizontalLayout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.verticalGroup {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.horizontalGroup {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.container {
+    display: flex;
+    margin: 5px;
+    flex-wrap: wrap;
+}
+
+.array {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+
+.array button{
+    max-width: 30px;
+    max-height: 30px;
+}
+
+.hidden {
+    display: none;
+}

@@ -1,0 +1,17 @@
+.field {
+    display: flex;
+    height: 5vh;
+    width: 80vh;
+    margin: 10px;
+    align-items: center;
+}
+
+label {
+}
+
+select {
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: black;
+    width: 80vh;
+}

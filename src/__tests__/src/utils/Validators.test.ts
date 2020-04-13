@@ -1,4 +1,4 @@
-import {Validators, validators, composeValidator, functionValidator} from '../../../utils/Validators';
+import {Validators, validators, getErorr, functionValidator} from '../../../utils/Validators';
 
 describe('Validators tests', () => {
    it('should return email error', () => {
@@ -20,7 +20,7 @@ describe('Validators tests', () => {
    it('should compose a string validator', () => {
       const validationString = 'required';
       const spy = jest.spyOn(validators, 'required');
-      const retval = composeValidator(validationString, '');
+      const retval = getErorr(validationString, '');
       expect(spy).toHaveBeenCalled();
       expect(retval).toEqual('The field cannot be empty');
    });
@@ -40,7 +40,7 @@ describe('Validators tests', () => {
       const validationArray = ['required','email'];
       const requiredSpy = jest.spyOn(validators,'required');
       const emailSpy = jest.spyOn( validators, 'email');
-      composeValidator(validationArray, 'asdf');
+      getErorr(validationArray, 'asdf');
       expect(requiredSpy && emailSpy).toHaveBeenCalledWith('asdf');
    });
 });

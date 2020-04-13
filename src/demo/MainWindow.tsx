@@ -46,7 +46,6 @@ class MainWindow extends React.Component <any, any> {
                     <div className={'controls'}>
                         <Form
                             onSubmit={this.handleSubmit}
-                            initialValues={{currentSchema: 'Simple'}}
                             render={(formProps) => {
                                 return (
                                     <form id={'inputForm'}>
@@ -106,12 +105,12 @@ class MainWindow extends React.Component <any, any> {
     renderFormBuilder = () => {
         if (_.isEmpty(this.state.currentSchema)) {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={DEMO_SCHEMAS['Simple'].value}
+                <FormBuilder formProps = {{onSubmit:this.handleSubmit}} schema={DEMO_SCHEMAS['Simple'].value}
                              componentFactory={COMPONENT_FACTORY} entityName={'first'} bottomBar={Button}/>
             )
         } else {
             return (
-                <FormBuilder onSubmit={this.handleSubmit} schema={this.state.currentSchema}
+                <FormBuilder formProps = {{onSubmit:this.handleSubmit}} schema={this.state.currentSchema}
                              componentFactory={COMPONENT_FACTORY} entityName={'first'} bottomBar={Button}/>
             )
         }

@@ -1,50 +1,65 @@
-import React from 'react';
-import {ComponentFactory, Fields, IFields, RenderOption, SimpleObj} from "../interfaces/SchemaInterfaces";
-import {Field, FormSpy, FormSpyRenderProps} from "react-final-form";
+import React from "react";
+import {
+  ComponentFactory,
+  Fields,
+  IFields,
+  RenderOption,
+  AnyObject
+} from "../interfaces/SchemaInterfaces";
+import { Field, FormSpy, FormSpyRenderProps } from "react-final-form";
 import TextInputField from "./input/TextInputField";
-import {FormHelper} from "../utils/FormHelper";
-import {validators} from "../utils/Validators";
+import { FormHelper } from "../utils/FormHelper";
+import { getErorr, validators } from "../utils/Validators";
+import { getComponent } from "../utils/GetComponent";
 
 interface IProps {
-    field: IFields;
-    renderOptions?: RenderOption;
-    formData: FormSpyRenderProps;
-    subscription: { [fieldStateName: string]: boolean } | undefined;
-    componentFactory?: ComponentFactory;
+  field: IFields;
+  renderOptions?: RenderOption;
+  formData: FormSpyRenderProps;
+  subscription: { [fieldStateName: string]: boolean } | undefined;
+  componentFactory?: ComponentFactory;
+  errorObject?: AnyObject;
+  fieldName: string;
 }
 
+class SpyWrapper extends React.Component<IProps, any> {
+  shouldComponentUpdate(
+    nextProps: Readonly<IProps>,
+    nextState: Readonly<any>,
+    nextContext: any
+  ): boolean {
+    if (this.props.renderOptions) {
+      return this.props.renderOptions(this.props.formData, nextProps);
+    } else if (nextProps !== this.props || nextState !== this.state) {
+      return true;
+    }
+    return false;
+  }
 
-class SpyWrapper extends React.Component<IProps, any>{
-
-    shouldComponentUpdate(nextProps: Readonly<IProps>, nextState: Readonly<any>, nextContext: any): boolean {
-        if(this.props.renderOptions) {
-            return this.props.renderOptions(this.props.formData, nextProps);
+  render = () => {
+    const {
+      field,
+      formData,
+      errorObject,
+      componentFactory,
+      fieldName
+    } = this.props;
+    return (
+      <Field
+        name={`${field.name}`}
+        component={getComponent(field, componentFactory)}
+        displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
+        hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}
+        validate={(value, allValues, meta) =>
+          getErorr(errorObject, field, value, allValues, meta, fieldName)
         }
-        return true
-    }
-
-    render = () => {
-        const {field, formData} = this.props;
-        return(
-            <Field
-                name={`${field.name}`}
-                component={this.handleComponent(field)}
-                displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
-                hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}
-                validate={(value) => (field.validators ? validators.required(value) : undefined)}
-                size={field.size ? FormHelper.metaDataEvaluator(field.size, formData): 10}
-                subscription={this.props.subscription}
-            />
-        )
-    }
-
-    handleComponent = (field: IFields) => {
-        if(this.props.componentFactory && field.component && this.props.componentFactory.hasOwnProperty(field.component)) {
-            return this.props.componentFactory[field.component];
-        } else {
-            return TextInputField;
+        size={
+          field.size ? FormHelper.metaDataEvaluator(field.size, formData) : 10
         }
-    }
+        subscription={this.props.subscription}
+      />
+    );
+  };
 }
 
-export default SpyWrapper
+export default SpyWrapper;

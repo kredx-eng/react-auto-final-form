@@ -1,5 +1,5 @@
 import { ComponentFactory, IFields } from "../interfaces/SchemaInterfaces";
-import { getFields } from "../components/GetFields";
+import { getInputs } from "../components/GetInputs";
 
 export const getComponent = (
   field: IFields,
@@ -26,6 +26,6 @@ export const getComponent = (
   ) {
     throw new Error(`Provided component`);
   } else {
-    return getFields({ field: field });
+    return getInputs({ field: field });
   }
 };

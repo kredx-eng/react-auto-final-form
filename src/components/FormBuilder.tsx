@@ -30,7 +30,7 @@ import arrayMutators from "final-form-arrays";
 import SpyWrapper from "./SpyWrapper";
 import DateInput from "./input/DateInput";
 import omit from "lodash/omit";
-import { getFields } from "./GetFields";
+import { getInputs } from "./GetInputs";
 import { getComponent } from "../utils/GetComponent";
 import { SchemaEvaluator } from "./SchemaEvaluator";
 

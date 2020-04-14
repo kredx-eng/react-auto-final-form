@@ -1,4 +1,3 @@
-import React from "react";
 import { IFields } from "../interfaces/SchemaInterfaces";
 import TextInputField from "./input/TextInputField";
 import SelectInputField from "./input/SelectInputField";
@@ -7,7 +6,7 @@ import DateInput from "./input/DateInput";
 interface IProps {
   field: IFields;
 }
-export const getFields = (props: IProps) => {
+export const getInputs = (props: IProps) => {
   const { field } = props;
   switch (field.type) {
     case "string":

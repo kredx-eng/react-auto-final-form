@@ -32,6 +32,7 @@ import DateInput from "./input/DateInput";
 import omit from "lodash/omit";
 import { getFields } from "./GetFields";
 import { getComponent } from "../utils/GetComponent";
+import { SchemaEvaluator } from "./SchemaEvaluator";
 
 const FIELD_TYPE = ["string", "array", "entity", "document", "group", "date"];
 
@@ -102,7 +103,9 @@ class FormBuilder extends React.Component<IProps, any> {
   };
 
   render = () => {
-    const { schema, formProps } = this.props;
+    const { schema, formProps, entityName, layoutName } = this.props;
+    const schemaEval = new SchemaEvaluator(schema, entityName, layoutName);
+    console.log("new schema", schemaEval.parsedSchema, schemaEval.layoutFields);
     try {
       const initialEntity = this.getInitialEntity();
       return (
@@ -112,7 +115,7 @@ class FormBuilder extends React.Component<IProps, any> {
             mutators={{ ...arrayMutators, date: dateMutator }}
             render={formProps => {
               this.formProps = formProps;
-              console.log("formProps", formProps, formProps.values);
+              // console.log("formProps", formProps, formProps.values);
               return (
                 <form onSubmit={formProps.handleSubmit}>
                   {this.entityEvaluator(initialEntity)}
@@ -452,11 +455,11 @@ class FormBuilder extends React.Component<IProps, any> {
       fieldName = field.name;
     }
 
-    if (!FIELD_TYPE.includes(field.type)) {
-      throw Error(
-        `The provided field type for the field name "${field.name}" is not supported`
-      );
-    }
+    // if (!FIELD_TYPE.includes(field.type)) {
+    //   throw Error(
+    //     `The provided field type for the field name "${field.name}" is not supported`
+    //   );
+    // }
 
     const errorObject =
       field.required || field.error
@@ -547,7 +550,6 @@ class FormBuilder extends React.Component<IProps, any> {
               render={(fieldArrayProps: any) => {
                 return fieldArrayProps.fields.map((name: any) => {
                   //try and finally used here to push and pop the name of array from the name stack, pops when the array evaluation is complete
-
                   try {
                     this.fieldNameStack.push(name);
                     return this.handleArray(

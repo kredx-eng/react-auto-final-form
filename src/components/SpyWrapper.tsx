@@ -16,7 +16,7 @@ interface IProps {
   field: IFields;
   renderOptions?: RenderOption;
   formData: FormSpyRenderProps;
-  subscription: { [fieldStateName: string]: boolean } | undefined;
+  subscription?: { [fieldStateName: string]: boolean } | undefined;
   componentFactory?: ComponentFactory;
   errorObject?: AnyObject;
   fieldName: string;
@@ -46,7 +46,7 @@ class SpyWrapper extends React.Component<IProps, any> {
     } = this.props;
     return (
       <Field
-        name={`${field.name}`}
+        name={fieldName}
         component={getComponent(field, componentFactory)}
         displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
         hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}

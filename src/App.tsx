@@ -13,6 +13,7 @@ import { RenderOption } from "./interfaces/SchemaInterfaces";
 import groupSchema from "./schemas/GroupSchema";
 import { createCompanySchema } from "./schemas/CompanySchema";
 import baseSchema from "./schemas/TestSchema";
+import { NewFormBuilder } from "./components/NewFormBuilder";
 
 export const COMPONENT_FACTORY = {
   string: TextInputField,
@@ -24,11 +25,11 @@ class App extends React.Component<any, any> {
   render() {
     return (
       //<MainWindow/>
-      <FormBuilder
+      <NewFormBuilder
         //@ts-ignore
-        schema={baseSchema}
+        schema={createCompanySchema}
         componentFactory={COMPONENT_FACTORY}
-        entityName={"base"}
+        entityName={"createCompany"}
         formProps={{
           subscription: { submitting: true, values: true },
           onSubmit: this.handleSubmit

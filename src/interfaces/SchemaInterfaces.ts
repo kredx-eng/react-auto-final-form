@@ -15,7 +15,7 @@ export interface IFields extends ILayoutFields {
   validators?: Array<Validators | string> | Validators | string;
   arrayType?: "entity";
   layoutName?: string;
-  entityName?: string | FieldFn;
+  entityName?: string;
   addText?: string;
   options?: Array<Options>;
   readonly?: boolean;

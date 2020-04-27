@@ -26,6 +26,7 @@ export interface IFields extends ILayoutFields {
   required?: boolean;
   error?: Function;
   validate?: Function;
+  displayIf?: Function;
 }
 
 export interface IEntities {
@@ -97,7 +98,7 @@ export type AnyObject = {
   [name: string]: any;
 };
 
-export type Options = { value: string; text: string };
+export type Options = { value?: string; text?: string; label?: string };
 
 export type RenderOption = (
   formState: FormSpyRenderProps,

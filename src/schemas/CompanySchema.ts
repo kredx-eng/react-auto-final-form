@@ -1,6 +1,7 @@
 import React from "react";
+import { ISchema } from "../interfaces/SchemaInterfaces";
 
-export const createCompanySchema = {
+export const createCompanySchema: any = {
   entities: [
     {
       name: "createCompany",
@@ -163,7 +164,8 @@ export const createCompanySchema = {
             return org_type_accepted;
           },
           displayName(m: any, r: any, g: any) {
-            if (m.type == "PROPRITORSHIP") {
+            console.log("called", m.type, r, g);
+            if (m.type == "PROPRIETORSHIP") {
               return "Pan No*";
             } else {
               return "Company's Pan No*";
@@ -171,8 +173,6 @@ export const createCompanySchema = {
           },
           error: (model: any, f: any, global: any) => {
             const { pan_number } = model;
-            console.log("model", model);
-
             if (pan_number) {
               const PAN_REGEX = new RegExp(
                 /^([a-zA-Z]{5})(\d{4})([a-zA-Z]{1})$/
@@ -201,7 +201,6 @@ export const createCompanySchema = {
             return org_type_accepted;
           },
           error(m: any, r: any, g: any) {
-            console.log("model", m);
             const org_type_accepted = m.type == "FOREIGN_COMPANY";
             if (org_type_accepted) {
               return m.fcrn && m.fcrn.length != 6
@@ -217,6 +216,7 @@ export const createCompanySchema = {
           displayName: "CIN*",
           type: "string",
           visible(m: any, r: any, g: any) {
+            console.log("asdf", m, g);
             const org_type_accepted =
               m.type == "PRIVATE_LIMITED" ||
               m.type == "PUBLIC_LIMITED" ||
@@ -224,7 +224,6 @@ export const createCompanySchema = {
             return org_type_accepted;
           },
           error(m: any, r: any, g: any) {
-            console.log("model", m);
             const org_type_accepted =
               m.type == "PRIVATE_LIMITED" ||
               m.type == "PUBLIC_LIMITED" ||
@@ -247,7 +246,6 @@ export const createCompanySchema = {
             return org_type_accepted;
           },
           error(m: any, r: any, g: any) {
-            console.log("model", m);
             const org_type_accepted = m.type == "LIMITED_LIABILITY";
             if (org_type_accepted) {
               return m.llpin && m.llpin.length != 8

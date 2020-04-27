@@ -1,4 +1,5 @@
 import { IFields, AnyObject } from "../interfaces/SchemaInterfaces";
+import { FormHelper } from "./FormHelper";
 import get from "lodash/get";
 
 export type Validators = (value: any) => string | undefined;
@@ -71,20 +72,23 @@ export const getErorr = (
     if (validator.required) {
       required = stringValidator("required", value);
     }
-    console.log("field", fieldName);
-    return required
-      ? required
-      : validator.error
-      ? validator.error(model, meta, model)
-      : undefined;
+    //TODO: AARSHI Remove this try catch code in production
+    try {
+      return required
+        ? required
+        : validator.error
+        ? validator.error(
+            FormHelper.getLocalModel(fieldName, model),
+            meta,
+            model
+          )
+        : undefined;
+    } catch (e) {
+      console.log("error", e);
+      throw new Error(e);
+      return undefined;
+    }
   }
-};
-
-const getLocalModel = (fieldName: string, model: AnyObject) => {
-  const entityNameArray = fieldName.split(".");
-  entityNameArray.pop();
-  console.log("field", fieldName, model, entityNameArray);
-  return get(model, entityNameArray) || {};
 };
 
 export const stringValidator = (validator: string, value: any) => {

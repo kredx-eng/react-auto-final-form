@@ -105,7 +105,6 @@ class FormBuilder extends React.Component<IProps, any> {
   render = () => {
     const { schema, formProps, entityName, layoutName } = this.props;
     const schemaEval = new SchemaEvaluator(schema, entityName, layoutName);
-    console.log("new schema", schemaEval.parsedSchema, schemaEval.layoutFields);
     try {
       const initialEntity = this.getInitialEntity();
       return (

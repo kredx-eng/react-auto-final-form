@@ -11,9 +11,10 @@ import TextInputField from "./input/TextInputField";
 import { FormHelper } from "../utils/FormHelper";
 import { getErorr, validators } from "../utils/Validators";
 import { getComponent } from "../utils/GetComponent";
+import omit from "lodash/omit";
 
 interface IProps {
-  field: IFields;
+  field: any;
   renderOptions?: RenderOption;
   formData: FormSpyRenderProps;
   subscription?: { [fieldStateName: string]: boolean } | undefined;
@@ -44,19 +45,21 @@ class SpyWrapper extends React.Component<IProps, any> {
       componentFactory,
       fieldName
     } = this.props;
+    console.log("formSpyData", fieldName);
     return (
       <Field
         name={fieldName}
         component={getComponent(field, componentFactory)}
-        displayName={FormHelper.metaDataEvaluator(field.displayName, formData)}
-        hidden={FormHelper.metaDataEvaluator(field.hidden, formData)}
         validate={(value, allValues, meta) =>
           getErorr(errorObject, field, value, allValues, meta, fieldName)
         }
         size={
-          field.size ? FormHelper.metaDataEvaluator(field.size, formData) : 10
+          field.size
+            ? FormHelper.metaDataEvaluator(field.size, formData, fieldName)
+            : 10
         }
         subscription={this.props.subscription}
+        {...omit(field, ["name"])}
       />
     );
   };

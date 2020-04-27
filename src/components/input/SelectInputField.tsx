@@ -1,10 +1,12 @@
 import React from "react";
+import { Form } from "react-bootstrap";
+import classNames from "classnames";
 
 const SelectInputField = (props: any) => {
   const { input, meta } = props;
   return (
-    <div className={"field"} style={{ flex: props.size }} key={input.name}>
-      <label>{props.displayName}</label>
+    <div className={"d-flex row-12 justify-content-between mb-3 "}>
+      <Form.Label>{props.displayName}</Form.Label>
       <select
         name={props.displayName}
         onChange={props.input.onChange}
@@ -12,6 +14,9 @@ const SelectInputField = (props: any) => {
         onBlur={input.onBlur}
         defaultValue={""}
         value={input.value}
+        className={classNames("rounded form-control col-9 bg-light", {
+          disabled: props.disabled
+        })}
       >
         {props.enum &&
           props.enum.map((options: any) => {

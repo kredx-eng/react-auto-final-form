@@ -77,6 +77,14 @@ export const addressEntity = {
             : "Please provide a valid Pincode."
           : "";
       }
+    },
+    {
+      name: "phones",
+      displayName: "Phone",
+      type: "array",
+      entityName: "phones",
+      className: "bg-dark",
+      layoutName: "edit"
     }
   ],
   layouts: [
@@ -102,9 +110,31 @@ export const addressEntity = {
             {
               name: "pincode",
               size: 6
+            },
+            {
+              name: "phones",
+              size: 12
             }
           ]
         }
+      ]
+    }
+  ]
+};
+
+export const phonesEntity = {
+  name: "phones",
+  fields: [
+    { name: "home", type: "string", displayName: "Home" },
+    { name: "mobile", type: "string", displayName: "Mobile" }
+  ],
+  layouts: [
+    {
+      name: "edit",
+      orientation: "horizontal",
+      fields: [
+        { name: "home", size: 6 },
+        { name: "mobile", size: 6 }
       ]
     }
   ]

@@ -1,46 +1,45 @@
 .verticalLayout {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
 }
 
 .horizontalLayout {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .verticalGroup {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
 }
 
 .horizontalGroup {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .container {
-    display: flex;
-    margin: 5px;
-    flex-wrap: wrap;
+  display: flex;
+  margin: 5px;
+  flex-wrap: wrap;
 }
 
 .array {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    margin: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin: 10px;
 }
 
-.array button{
-    max-width: 30px;
-    max-height: 30px;
+.array button {
+  max-width: 100px;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }

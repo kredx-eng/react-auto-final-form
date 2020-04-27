@@ -140,22 +140,23 @@ const organizationDetailPreSanctionEntity = {
       displayName: "CIN/LLPIN*",
       type: "string",
       visible(m: any, r: any, g: any) {
-        return g.organization.type == "LIMITED_LIABILITY" ||
-          g.organization.type == "PRIVATE_LIMITED" ||
-          g.organization.type == "PUBLIC_LIMITED" ||
-          g.organization.type == "GOVERNMENT"
+        console.log("visible cin", m, g);
+        return g.organization_info.type == "LIMITED_LIABILITY" ||
+          g.organization_info.type == "PRIVATE_LIMITED" ||
+          g.organization_info.type == "PUBLIC_LIMITED" ||
+          g.organization_info.type == "GOVERNMENT"
           ? true
           : false;
       },
       error(m: any, r: any, g: any) {
         return (m.cin &&
           m.cin.length != 21 &&
-          (g.organization.type == "PRIVATE_LIMITED" ||
-            g.organization.type == "PUBLIC_LIMITED" ||
-            g.organization.type == "GOVERNMENT")) ||
+          (g.organization_info.type == "PRIVATE_LIMITED" ||
+            g.organization_info.type == "PUBLIC_LIMITED" ||
+            g.organization_info.type == "GOVERNMENT")) ||
           (m.cin &&
             m.cin.length != 8 &&
-            g.organization.type == "LIMITED_LIABILITY")
+            g.organization_info.type == "LIMITED_LIABILITY")
           ? "Please enter a valid CIN/LLPIN number"
           : "";
       }

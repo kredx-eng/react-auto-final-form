@@ -21,6 +21,9 @@ import { getComponent } from "../utils/GetComponent";
 import { getErorr } from "../utils/Validators";
 import omit from "lodash/omit";
 import SpyWrapper from "./SpyWrapper";
+import { FormHelper } from "../utils/FormHelper";
+import { FieldArray } from "react-final-form-arrays";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 interface IProps {
   schema: ISchema;
@@ -59,17 +62,21 @@ const dateMutator = (args: string, state: any, utils: any) => {
   utils.changeValue(state, args[0], (value: any) => setDate(value));
 };
 
-export class NewFormBuilder extends React.PureComponent<IProps, any> {
+export class NewFormBuilder extends React.PureComponent<any, any> {
   formProps: any;
 
   render = () => {
     const { schema, entityName, layoutName, bottomBar, formProps } = this.props;
     const evaluatedSchema = new SchemaEvaluator(schema, entityName, layoutName);
     const { parsedSchema, layoutFields } = evaluatedSchema;
-    console.log("okay", parsedSchema, layoutFields);
-    const isLayoutFields = !!isEmpty(parsedSchema);
+    console.log("henlo", parsedSchema, layoutFields);
+    const isLayoutFields = true;
     return (
-      <div className={"container"} key={"container"}>
+      <div
+        className={"container col-12"}
+        key={"container"}
+        style={{ width: "100vw" }}
+      >
         <Form
           {...formProps}
           mutators={{ ...arrayMutators, date: dateMutator }}
@@ -77,10 +84,7 @@ export class NewFormBuilder extends React.PureComponent<IProps, any> {
             this.formProps = formProps;
             return (
               <form onSubmit={formProps.handleSubmit}>
-                {this.getFields(
-                  isLayoutFields ? layoutFields : parsedSchema,
-                  isLayoutFields
-                )}
+                {this.getFields(parsedSchema, isLayoutFields)}
                 <Field
                   name={"bottomBar"}
                   component={this.props.bottomBar}
@@ -94,12 +98,18 @@ export class NewFormBuilder extends React.PureComponent<IProps, any> {
     );
   };
 
-  getFields = (field: any, isLayoutFields: boolean) => {
-    if (!isLayoutFields && typeof field === "object") {
+  getFields = (
+    field: any,
+    orientation: boolean,
+    arrayProperties?: AnyObject
+  ) => {
+    if (!orientation && typeof field === "object") {
+      console.log("here", field, orientation);
       return Object.keys(field).map(fieldName =>
-        this.renderField(field[fieldName], fieldName)
+        this.renderField(field[fieldName], fieldName, arrayProperties)
       );
-    } else if (Array.isArray(field) && isLayoutFields) {
+    } else if (Array.isArray(field) && orientation) {
+      console.log("okay", field, orientation);
       return field.map(layout => {
         return (
           <div
@@ -111,15 +121,24 @@ export class NewFormBuilder extends React.PureComponent<IProps, any> {
           >
             {Object.keys(layout.fields).map(fieldName =>
               // @ts-ignore
-              this.renderField(layout.fields[fieldName], fieldName)
+              this.renderField(
+                layout.fields[fieldName],
+                fieldName,
+                arrayProperties
+              )
             )}
           </div>
         );
       });
+    } else if (orientation) {
     }
   };
 
-  renderField = (field: any, fieldName: string) => {
+  renderField = (
+    field: any,
+    fieldName: string,
+    arrayProperties?: AnyObject
+  ) => {
     const { componentFactory } = this.props;
     const errorObject =
       field.required || field.error
@@ -128,68 +147,106 @@ export class NewFormBuilder extends React.PureComponent<IProps, any> {
             required: field.required || false
           }
         : {};
-    if (this.fieldPropertyCheck(field)) {
+    if (FormHelper.fieldPropertyCheck(field)) {
       return (
         <FormSpy
           render={formSpyProps => {
+            const evaluatedField = FormHelper.metaDataEvaluator(
+              //@ts-ignore
+              omit(field, ["error"]),
+              formSpyProps,
+              fieldName
+            );
             return (
-              <div
-                className={"fieldContainer"}
-                style={this.buildCustomStyle(field)}
+              <Field
+                name={
+                  arrayProperties && arrayProperties.name
+                    ? `${arrayProperties.name}.${fieldName}`
+                    : fieldName
+                }
+                component={getComponent(evaluatedField, componentFactory)}
                 key={fieldName}
-              >
-                <SpyWrapper
-                  field={field}
-                  formData={formSpyProps}
-                  renderOptions={
-                    this.props.renderOption
-                      ? this.props.renderOption
-                      : undefined
-                  }
-                  //subscription={this.fieldSubscriptionEvaluator(field)}
-                  componentFactory={this.props.componentFactory}
-                  key={fieldName}
-                  errorObject={errorObject}
-                  fieldName={fieldName}
-                  {...omit(field, ["validate", "name", "component"])}
-                />
-              </div>
+                validate={(value, allValues, meta) =>
+                  getErorr(
+                    errorObject,
+                    field,
+                    value,
+                    allValues,
+                    meta,
+                    fieldName
+                  )
+                }
+                //subscription={this.fieldSubscriptionEvaluator(field)}
+                mutators={this.formProps.mutators}
+                {...omit(evaluatedField, ["validate", "name", "component"])}
+              />
             );
           }}
         />
       );
-    } else {
+    } else if (field.type === "array") {
       return (
         <div
-          className={"fieldContainer"}
+          className={"array ml-10"}
           style={this.buildCustomStyle(field)}
           key={fieldName}
         >
-          <Field
+          <label>
+            <b>{field.displayName}</b>
+          </label>
+          <FieldArray
             name={fieldName}
-            component={getComponent(field, componentFactory)}
-            key={fieldName}
-            validate={(value, allValues, meta) =>
-              getErorr(errorObject, field, value, allValues, meta, fieldName)
-            }
-            //subscription={this.fieldSubscriptionEvaluator(field)}
-            mutators={this.formProps.mutators}
-            {...omit(field, ["validate", "name", "component"])}
+            render={(fieldArrayProps: any) => {
+              console.log("fieldsssss", field);
+              return fieldArrayProps.fields.map((name: any) =>
+                this.getFields(field.arrayFields, field.isLayoutField, {
+                  name
+                })
+              );
+            }}
           />
+          <button
+            type={"button"}
+            className={"btn btn-outline-primary w-20"}
+            onClick={() =>
+              this.formProps.form.mutators.push(fieldName, undefined)
+            }
+          >
+            {field.addText ? field.addText : "Add +"}
+          </button>
+          <button
+            type={"button"}
+            className={"btn btn-outline-danger w-20"}
+            onClick={() =>
+              this.formProps.form.mutators.pop(fieldName, undefined)
+            }
+          >
+            {field.addText ? field.addText : "Delete -"}
+          </button>
         </div>
+      );
+    } else {
+      return (
+        <Field
+          name={
+            arrayProperties && arrayProperties.name
+              ? `${arrayProperties.name}.${fieldName}`
+              : fieldName
+          }
+          component={getComponent(field, componentFactory)}
+          key={fieldName}
+          validate={(value, allValues, meta) =>
+            getErorr(errorObject, field, value, allValues, meta, fieldName)
+          }
+          //subscription={this.fieldSubscriptionEvaluator(field)}
+          mutators={this.formProps.mutators}
+          {...omit(field, ["validate", "name", "component"])}
+        />
       );
     }
   };
 
   //To check whether any field property is of type function
-  fieldPropertyCheck = (field: any) => {
-    for (let key in field) {
-      if (typeof field[key] === "function") {
-        return true;
-      }
-    }
-    return false;
-  };
 
   buildCustomStyle = (field: IFields) => {
     let size: number;

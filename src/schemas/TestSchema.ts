@@ -1,6 +1,6 @@
 import { organizationDetailPreSanctionEntity } from "./common/organizationEntity";
 import { bankInfoEntity } from "./common/bankInfoEntity";
-import { addressEntity } from "./common/addressEntity";
+import { addressEntity, phonesEntity } from "./common/addressEntity";
 
 const baseSchema = {
   entities: [
@@ -10,17 +10,20 @@ const baseSchema = {
         {
           name: "baseAddress",
           type: "entity",
-          entityName: "address"
+          entityName: "address",
+          layoutName: "edit"
         },
         {
           name: "baseOrganization",
           type: "entity",
-          entityName: "organization_info"
+          entityName: "organization_info",
+          layoutName: "edit"
         },
         {
           name: "baseBankInfo",
           type: "entity",
-          entityName: "bank_info_entity"
+          entityName: "bank_info_entity",
+          layoutName: "edit"
         }
       ]
     }
@@ -31,7 +34,8 @@ baseSchema.entities.push(
   // @ts-ignore
   organizationDetailPreSanctionEntity,
   bankInfoEntity,
-  addressEntity
+  addressEntity,
+  phonesEntity
 );
 
 export default baseSchema;

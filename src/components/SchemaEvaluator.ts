@@ -9,6 +9,7 @@ import {
 } from "../interfaces/SchemaInterfaces";
 import omit from "lodash/omit";
 import merge from "lodash/merge";
+import isEmpty from "lodash/isEmpty";
 
 export class SchemaEvaluator {
   schema: ISchema;
@@ -19,19 +20,23 @@ export class SchemaEvaluator {
 
   //Private variables
   private fields: AnyObject = {};
+  private arrayField: AnyObject = {};
   // private layoutName: string | undefined;
 
   constructor(schema: ISchema, initialEntityName: string, layoutName?: string) {
     this.schema = schema;
     this.fieldNameStack = [];
-    this.parsedSchema = {};
+    this.parsedSchema = [];
     this.subscribedFields = [];
-    this.parseEntity(initialEntityName, layoutName);
+    this.parseEntity(initialEntityName, layoutName, true);
     this.fields = {};
   }
-  private parseEntity = (entityName: string, layoutName?: string) => {
-    const { entities } = this.schema;
-    const requiredEntity = entities.find(entity => entity.name === entityName);
+  private parseEntity = (
+    entityName: string,
+    layoutName?: string,
+    isInitialEntity?: boolean
+  ) => {
+    const requiredEntity = this.getEntity(entityName);
     if (!requiredEntity) {
       throw new Error(
         `Provided property entityName: ${entityName}, does not exist in the provided schema`
@@ -40,31 +45,76 @@ export class SchemaEvaluator {
       if (layoutName && requiredEntity.layouts) {
         this.getLayoutFields(requiredEntity, layoutName);
       } else if (requiredEntity.fields) {
-        this.getFields(requiredEntity);
+        this.getFields(requiredEntity, false, isInitialEntity);
+        this.pushAndEmptyFields();
       }
     }
   };
-  private getFields = (entity: IEntities, isLayoutField?: boolean) => {
+
+  pushAndEmptyFields = (orientation?: "vertical" | "horizontal") => {
+    this.parsedSchema.push({
+      orientation: orientation || "vertical",
+      fields: this.fields
+    });
+    this.fields = {};
+  };
+
+  private getEntity = (entityName: string) => {
+    const { entities } = this.schema;
+    return entities.find(entity => entity.name === entityName);
+  };
+
+  private getFields = (
+    entity: any,
+    isLayoutField?: boolean,
+    isInitialEntity?: boolean,
+    isArrayField?: boolean
+  ) => {
     if (entity.fields) {
       const { fields } = entity;
-      this.fieldNameStack.push(entity.name);
+      if (!isInitialEntity) {
+        this.fieldNameStack.push(entity.name);
+      }
       // @ts-ignore
       fields.forEach((field, key) => {
+        const fieldName = isArrayField
+          ? field.name
+          : this.getName(Array.isArray(fields) ? field.name : key);
+
         if (field.type === "entity") {
           if (!field.entityName) {
             throw new Error(
               `Please provide entityName for a field type of entity for field with name: ${field.name}`
             );
           } else {
-            this.parseEntity(field.entityName);
+            if (!isEmpty(this.fields)) {
+              this.pushAndEmptyFields(entity.orientation);
+            }
+            this.parseEntity(field.entityName, field.layoutName, false);
           }
         } else if (field.type === "array") {
-          Object.assign(isLayoutField ? this.fields : this.parsedSchema, {
-            [this.getName(field.name)]: { ...field }
-          });
+          console.log("arrayfield", field, this.fields);
+          if (!isEmpty(this.fields)) {
+            this.pushAndEmptyFields(field.orientation);
+          }
+          if (!field.entityName) {
+            throw new Error(
+              `Please provide entityName for a field type of entity for field with name: ${field.name}`
+            );
+          } else {
+            Object.assign(this.fields, {
+              [fieldName]: {
+                ...field,
+                arrayFields: this.getArrayFields(
+                  field.entityName,
+                  field.layoutName
+                )
+              }
+            });
+          }
         } else {
-          Object.assign(isLayoutField ? this.fields : this.parsedSchema, {
-            [this.getName(Array.isArray(fields) ? field.name : key)]: {
+          Object.assign(isArrayField ? this.arrayField : this.fields, {
+            [fieldName]: {
               ...field
             }
           });
@@ -74,6 +124,25 @@ export class SchemaEvaluator {
       });
       this.fieldNameStack.pop();
     }
+  };
+
+  private getArrayFields = (entityName: "string", layoutName?: string) => {
+    const requiredEntity = this.getEntity(entityName);
+    if (!requiredEntity) {
+      throw new Error(
+        `Provided property entityName: ${entityName}, does not exist in the provided schema`
+      );
+    } else {
+      console.log("pre get arrayfield", this.fields);
+      if (layoutName) {
+        this.getLayoutFields(requiredEntity, layoutName, true);
+      } else {
+        this.getFields(requiredEntity, true, true, true);
+      }
+    }
+    const retVal = Object.assign({}, this.arrayField);
+    this.arrayField = {};
+    return retVal;
   };
 
   private getName = (fieldName: string) => {
@@ -90,7 +159,11 @@ export class SchemaEvaluator {
     }
   };
 
-  private getLayoutFields = (entity: IEntities, layoutName: string) => {
+  private getLayoutFields = (
+    entity: IEntities,
+    layoutName: string,
+    isArrayField?: boolean
+  ) => {
     const requiredLayout =
       entity.layouts &&
       //@ts-ignore
@@ -102,21 +175,18 @@ export class SchemaEvaluator {
     } else {
       if (requiredLayout.groups) {
         requiredLayout.groups.forEach((group: IGroups) => {
-          this.layoutFields.push(this.generateLayoutFields(group, entity));
-          this.fields = {};
+          this.generateLayoutFields(group, entity, isArrayField);
         });
       } else {
-        this.layoutFields.push(
-          this.generateLayoutFields(requiredLayout, entity)
-        );
-        this.fields = {};
+        this.generateLayoutFields(requiredLayout, entity, isArrayField);
       }
     }
   };
 
   private generateLayoutFields = (
     layout: ILayout | IGroups,
-    entity: IEntities
+    entity: IEntities,
+    isArrayField?: boolean
   ) => {
     let mergedFields: Array<any> = [];
     // @ts-ignore
@@ -130,13 +200,11 @@ export class SchemaEvaluator {
         )
       );
     });
-    let customEntity = entity;
-    customEntity.fields = mergedFields;
-    this.getFields(customEntity, true);
-    return {
-      ...omit(layout, ["fields"]),
-      fields: this.fields,
-      isLayoutField: true
-    };
+    let customEntity = Object.assign({}, entity);
+    Object.assign(customEntity, {
+      fields: mergedFields,
+      orientation: layout.orientation
+    });
+    this.getFields(customEntity, true, false, isArrayField);
   };
 }

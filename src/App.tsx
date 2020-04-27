@@ -14,6 +14,7 @@ import groupSchema from "./schemas/GroupSchema";
 import { createCompanySchema } from "./schemas/CompanySchema";
 import baseSchema from "./schemas/TestSchema";
 import { NewFormBuilder } from "./components/NewFormBuilder";
+import { GetForm } from "./GetForm";
 
 export const COMPONENT_FACTORY = {
   string: TextInputField,
@@ -27,16 +28,18 @@ class App extends React.Component<any, any> {
       //<MainWindow/>
       <NewFormBuilder
         //@ts-ignore
-        schema={createCompanySchema}
+        schema={baseSchema}
         componentFactory={COMPONENT_FACTORY}
-        entityName={"createCompany"}
+        entityName={"base"}
         formProps={{
           subscription: { submitting: true, values: true },
-          onSubmit: this.handleSubmit
+          onSubmit: this.handleSubmit,
+          validateOnBlur: true
         }}
         bottomBar={Button}
         renderOption={this.renderOption}
-        layoutName={"edit"}
+        //layoutName={"edit"}
+        useBootstrap={true}
       />
     );
   }

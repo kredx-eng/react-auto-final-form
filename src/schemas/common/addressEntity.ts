@@ -124,10 +124,14 @@ export const addressEntity = {
 
 export const phonesEntity = {
   name: "phones",
-  fields: [
-    { name: "home", type: "string", displayName: "Home" },
-    { name: "mobile", type: "string", displayName: "Mobile" }
-  ],
+  fields: {
+    home: { name: "home", type: "string", displayName: "Home" },
+    mobile: {
+      name: "mobile",
+      type: "string",
+      displayName: "Mobile"
+    }
+  },
   layouts: [
     {
       name: "edit",

@@ -1,19 +1,15 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { newSchema } from "./schemas/Schema2";
-import FormBuilder from "./components/FormBuilder";
 import { Form, Field, FormSpyRenderProps } from "react-final-form";
 import TextInputField from "./components/input/TextInputField";
 import SelectInputField from "./components/input/SelectInputField";
 import Button from "./components/input/FormButton";
-import { functionSchema } from "./schemas/Schema3";
 import MainWindow from "./demo/MainWindow";
-import { RenderOption } from "./interfaces/SchemaInterfaces";
-import groupSchema from "./schemas/GroupSchema";
+import { RenderOption } from "./FormBuilder/interfaces/SchemaInterfaces";
 import { createCompanySchema } from "./schemas/CompanySchema";
 import baseSchema from "./schemas/TestSchema";
-import { NewFormBuilder } from "./components/NewFormBuilder";
+import { NewFormBuilder } from "./FormBuilder/NewFormBuilder";
 import { GetForm } from "./GetForm";
 
 export const COMPONENT_FACTORY = {

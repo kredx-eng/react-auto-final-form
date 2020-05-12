@@ -219,6 +219,7 @@ const organizationDetailPreSanctionEntity = {
       name: "gstn",
       displayName: "Provisional GST lD No",
       type: "string",
+      parentClassname: "d-flex col",
       error(m: any) {
         if (m.gstn) {
           const gstnRegx = RegExp(

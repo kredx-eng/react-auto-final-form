@@ -1,10 +1,10 @@
 import React from 'react';
-import {ISchema} from "../interfaces/SchemaInterfaces";
+import {Schema} from "../FormBuilder/interfaces/SchemaInterfaces";
 import './SchemaSelect.css'
 
 interface IProps {
     schemas: {
-        [name: string]: ISchema
+        [name: string]: Schema
     };
 }
 

@@ -1,4 +1,4 @@
-import { AnyObject } from "../interfaces/SchemaInterfaces";
+import { AnyObject } from "../FormBuilder/interfaces/SchemaInterfaces";
 
 export interface ClassnameArgsObject {
   [key: string]: boolean;

@@ -1,5 +1,8 @@
 import React from "react";
-import { IFields, ILayout } from "../../interfaces/SchemaInterfaces";
+import {
+  SchemaFields,
+  SchemaLayout
+} from "../../FormBuilder/interfaces/SchemaInterfaces";
 import { FieldRenderProps } from "react-final-form";
 import "./TextInputField.css";
 import Form from "react-bootstrap/Form";
@@ -7,8 +10,8 @@ import Row from "react-bootstrap/Row";
 import classnames from "classnames";
 
 interface IProps {
-  field: IFields;
-  layout?: ILayout;
+  field: SchemaFields;
+  layout?: SchemaLayout;
   fieldProps: FieldRenderProps<any, any>;
 }
 

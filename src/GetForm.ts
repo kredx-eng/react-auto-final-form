@@ -1,9 +1,8 @@
 import React from "react";
 import { BootstrapWrapper } from "./components/ExternalWrapperHOC's/BootstrapWrapper";
-import { NewFormBuilder } from "./components/NewFormBuilder";
+import { NewFormBuilder } from "./FormBuilder/NewFormBuilder";
 
 export const GetForm = (props: any) => {
-  console.log("getformprops", props);
   if (props.useBootstrap) {
     return React.createElement(BootstrapWrapper(NewFormBuilder), { ...props });
   } else {

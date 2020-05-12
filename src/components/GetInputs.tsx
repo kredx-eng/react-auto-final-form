@@ -1,10 +1,9 @@
-import { IFields } from "../interfaces/SchemaInterfaces";
+import { SchemaFields } from "../FormBuilder/interfaces/SchemaInterfaces";
 import TextInputField from "./input/TextInputField";
 import SelectInputField from "./input/SelectInputField";
-import DateInput from "./input/DateInput";
 
 interface IProps {
-  field: IFields;
+  field: SchemaFields;
 }
 export const getInputs = (props: IProps) => {
   const { field } = props;
@@ -16,8 +15,6 @@ export const getInputs = (props: IProps) => {
       return TextInputField;
     case "number":
       return TextInputField;
-    case "date":
-      return DateInput;
     default:
       return TextInputField;
   }

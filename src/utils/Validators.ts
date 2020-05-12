@@ -1,4 +1,7 @@
-import { IFields, AnyObject } from "../interfaces/SchemaInterfaces";
+import {
+  SchemaFields,
+  AnyObject
+} from "../FormBuilder/interfaces/SchemaInterfaces";
 import { FormHelper } from "./FormHelper";
 import get from "lodash/get";
 
@@ -61,7 +64,7 @@ export const validators = {
 
 export const getErorr = (
   validator: AnyObject | undefined,
-  field: IFields,
+  field: SchemaFields,
   value: any,
   model: AnyObject,
   meta: any,

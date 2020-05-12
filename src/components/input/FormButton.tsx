@@ -1,11 +1,10 @@
 import React from "react";
-import { IFields } from "../../interfaces/SchemaInterfaces";
 import { FieldRenderProps } from "react-final-form";
 import "./FormButton.css";
 
 interface IProps {
   onClick: any;
-  field: IFields;
+  field: any;
   fieldProps: FieldRenderProps<any, any>;
 }
 

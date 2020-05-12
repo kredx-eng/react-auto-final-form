@@ -1,11 +1,11 @@
 import React from "react";
 import {
   ComponentFactory,
-  Fields,
-  IFields,
+  FieldsObject,
+  SchemaFields,
   RenderOption,
   AnyObject
-} from "../interfaces/SchemaInterfaces";
+} from "../FormBuilder/interfaces/SchemaInterfaces";
 import { Field, FormSpy, FormSpyRenderProps } from "react-final-form";
 import TextInputField from "./input/TextInputField";
 import { FormHelper } from "../utils/FormHelper";
@@ -45,7 +45,6 @@ class SpyWrapper extends React.Component<IProps, any> {
       componentFactory,
       fieldName
     } = this.props;
-    console.log("formSpyData", fieldName);
     return (
       <Field
         name={fieldName}

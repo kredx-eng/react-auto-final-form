@@ -1,5 +1,8 @@
 import { FormSpyRenderProps } from "react-final-form";
-import { AnyObject, IFields } from "../interfaces/SchemaInterfaces";
+import {
+  AnyObject,
+  SchemaFields
+} from "../FormBuilder/interfaces/SchemaInterfaces";
 import get from "lodash/get";
 
 const evaluator = (evaluatee: Function, formState: any) => {
@@ -14,7 +17,6 @@ const updateFormState = (formProps: any) => {
   formState = formProps;
   renderCount += 1;
   const getFieldState = formState.form.getFieldState("name");
-  // console.log(getFieldState, 'OKAY')
 };
 
 const getFieldState = (fieldName: string) => {
@@ -25,11 +27,11 @@ const getFieldState = (fieldName: string) => {
 };
 
 const metaDataEvaluator = (
-  field: IFields,
+  field: SchemaFields,
   formSpyProps: FormSpyRenderProps,
   fieldName: string
 ) => {
-  let evaluatedField: IFields = field;
+  let evaluatedField: SchemaFields = field;
   Object.keys(field).forEach(key => {
     Object.assign(evaluatedField, {
       // @ts-ignore

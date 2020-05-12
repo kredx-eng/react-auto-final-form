@@ -1,5 +1,5 @@
 import React from "react";
-import { ISchema } from "../interfaces/SchemaInterfaces";
+import { Schema } from "../FormBuilder/interfaces/SchemaInterfaces";
 
 export const createCompanySchema: any = {
   entities: [

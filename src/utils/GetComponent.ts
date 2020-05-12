@@ -1,10 +1,13 @@
-import { ComponentFactory, IFields } from "../interfaces/SchemaInterfaces";
+import {
+  ComponentFactory,
+  SchemaFields
+} from "../FormBuilder/interfaces/SchemaInterfaces";
 import { getInputs } from "../components/GetInputs";
 import TextInputField from "../components/input/TextInputField";
 import SelectInputField from "../components/input/SelectInputField";
 
 export const getComponent = (
-  field: IFields,
+  field: SchemaFields,
   componentFactory?: ComponentFactory
 ) => {
   Object.assign(componentFactory, {

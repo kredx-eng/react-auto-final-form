@@ -1,18 +1,19 @@
 import {
   AnyObject,
-  Fields,
-  IEntities,
-  IFields,
-  IGroups,
-  ILayout,
-  ISchema
-} from "../interfaces/SchemaInterfaces";
+  FieldsObject,
+  SchemaEntities,
+  SchemaFields,
+  Groups,
+  SchemaLayout,
+  Schema
+} from "./interfaces/SchemaInterfaces";
 import omit from "lodash/omit";
 import merge from "lodash/merge";
 import isEmpty from "lodash/isEmpty";
+import { canonizeSchema } from "../utils/CanonizeSchema";
 
 export class SchemaEvaluator {
-  schema: ISchema;
+  schema: AnyObject;
   parsedSchema: AnyObject | Array<any>;
   fieldNameStack: Array<string>;
   subscribedFields: Array<string>;
@@ -23,8 +24,8 @@ export class SchemaEvaluator {
   private arrayField: AnyObject = {};
   // private layoutName: string | undefined;
 
-  constructor(schema: ISchema, initialEntityName: string, layoutName?: string) {
-    this.schema = schema;
+  constructor(schema: any, initialEntityName: string, layoutName?: string) {
+    this.schema = canonizeSchema(schema);
     this.fieldNameStack = [];
     this.parsedSchema = [];
     this.subscribedFields = [];
@@ -60,8 +61,9 @@ export class SchemaEvaluator {
   };
 
   private getEntity = (entityName: string) => {
+    console.log("entity", this.schema, entityName);
     const { entities } = this.schema;
-    return entities.find(entity => entity.name === entityName);
+    return entities.find((entity: any) => entity.name === entityName);
   };
 
   private getFields = (
@@ -93,9 +95,8 @@ export class SchemaEvaluator {
             this.parseEntity(field.entityName, field.layoutName, false);
           }
         } else if (field.type === "array") {
-          console.log("arrayfield", field, this.fields);
           if (!isEmpty(this.fields)) {
-            this.pushAndEmptyFields(field.orientation);
+            this.pushAndEmptyFields(entity.orientation);
           }
           if (!field.entityName) {
             throw new Error(
@@ -118,7 +119,8 @@ export class SchemaEvaluator {
               ...field
             }
           });
-          if (field.subscription) {
+          if (isArrayField) {
+            Object.assign(this.arrayField, { orientation: entity.orientation });
           }
         }
       });
@@ -133,7 +135,6 @@ export class SchemaEvaluator {
         `Provided property entityName: ${entityName}, does not exist in the provided schema`
       );
     } else {
-      console.log("pre get arrayfield", this.fields);
       if (layoutName) {
         this.getLayoutFields(requiredEntity, layoutName, true);
       } else {
@@ -160,7 +161,7 @@ export class SchemaEvaluator {
   };
 
   private getLayoutFields = (
-    entity: IEntities,
+    entity: SchemaEntities,
     layoutName: string,
     isArrayField?: boolean
   ) => {
@@ -174,7 +175,7 @@ export class SchemaEvaluator {
       );
     } else {
       if (requiredLayout.groups) {
-        requiredLayout.groups.forEach((group: IGroups) => {
+        requiredLayout.groups.forEach((group: Groups) => {
           this.generateLayoutFields(group, entity, isArrayField);
         });
       } else {
@@ -184,8 +185,8 @@ export class SchemaEvaluator {
   };
 
   private generateLayoutFields = (
-    layout: ILayout | IGroups,
-    entity: IEntities,
+    layout: SchemaLayout | Groups,
+    entity: SchemaEntities,
     isArrayField?: boolean
   ) => {
     let mergedFields: Array<any> = [];
@@ -200,7 +201,7 @@ export class SchemaEvaluator {
         )
       );
     });
-    let customEntity = Object.assign({}, entity);
+    let customEntity = Object.assign({}, omit(entity, ["layouts"]));
     Object.assign(customEntity, {
       fields: mergedFields,
       orientation: layout.orientation

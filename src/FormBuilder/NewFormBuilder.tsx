@@ -2,10 +2,10 @@ import React from "react";
 import {
   AnyObject,
   ComponentFactory,
-  IFields,
-  ISchema,
+  SchemaFields,
+  Schema,
   RenderOption
-} from "../interfaces/SchemaInterfaces";
+} from "./interfaces/SchemaInterfaces";
 import {
   FieldRenderProps,
   FormProps,
@@ -14,19 +14,19 @@ import {
 } from "react-final-form";
 import { SchemaEvaluator } from "./SchemaEvaluator";
 import isEmpty from "lodash/isEmpty";
-import "./FormBuilder.css";
+import "../components/FormBuilder.css";
 import { Form, Field } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import { getComponent } from "../utils/GetComponent";
 import { getErorr } from "../utils/Validators";
 import omit from "lodash/omit";
-import SpyWrapper from "./SpyWrapper";
 import { FormHelper } from "../utils/FormHelper";
 import { FieldArray } from "react-final-form-arrays";
 import "bootstrap/dist/css/bootstrap.min.css";
+import classNames from "classnames";
 
 interface IProps {
-  schema: ISchema;
+  schema: Schema;
   componentFactory?: ComponentFactory;
   entityName: string;
   layoutName?: string;
@@ -72,11 +72,7 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
     console.log("henlo", parsedSchema, layoutFields);
     const isLayoutFields = true;
     return (
-      <div
-        className={"container col-12"}
-        key={"container"}
-        style={{ width: "100vw" }}
-      >
+      <div className={"container-fluid form-builder"}>
         <Form
           {...formProps}
           mutators={{ ...arrayMutators, date: dateMutator }}
@@ -84,7 +80,7 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
             this.formProps = formProps;
             return (
               <form onSubmit={formProps.handleSubmit}>
-                {this.getFields(parsedSchema, isLayoutFields)}
+                {this.getFields(parsedSchema)}
                 <Field
                   name={"bottomBar"}
                   component={this.props.bottomBar}
@@ -98,26 +94,14 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
     );
   };
 
-  getFields = (
-    field: any,
-    orientation: boolean,
-    arrayProperties?: AnyObject
-  ) => {
-    if (!orientation && typeof field === "object") {
-      console.log("here", field, orientation);
-      return Object.keys(field).map(fieldName =>
-        this.renderField(field[fieldName], fieldName, arrayProperties)
-      );
-    } else if (Array.isArray(field) && orientation) {
-      console.log("okay", field, orientation);
-      return field.map(layout => {
+  getFields = (parsedSchema: any, arrayProperties?: AnyObject) => {
+    if (Array.isArray(parsedSchema)) {
+      return parsedSchema.map(layout => {
         return (
           <div
-            className={
-              layout.orientation === "vertical"
-                ? "verticalLayout"
-                : "horizontalLayout"
-            }
+            className={classNames(
+              layout.orientation === "vertical" ? "col" : "row"
+            )}
           >
             {Object.keys(layout.fields).map(fieldName =>
               // @ts-ignore
@@ -130,7 +114,25 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
           </div>
         );
       });
-    } else if (orientation) {
+    } else if (typeof parsedSchema === "object" && arrayProperties) {
+      // for arrays
+      const { orientation } = parsedSchema;
+      const modfifiedArraySchema = omit(parsedSchema, ["orientation"]);
+      return (
+        <div
+          className={
+            orientation === "vertical" ? "verticalLayout" : "horizontalLayout"
+          }
+        >
+          {Object.keys(modfifiedArraySchema).map(fieldName => {
+            return this.renderField(
+              modfifiedArraySchema[fieldName],
+              fieldName,
+              arrayProperties
+            );
+          })}
+        </div>
+      );
     }
   };
 
@@ -186,46 +188,58 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
       );
     } else if (field.type === "array") {
       return (
-        <div
-          className={"array ml-10"}
-          style={this.buildCustomStyle(field)}
-          key={fieldName}
-        >
+        <div className={"m-20"} key={fieldName}>
           <label>
             <b>{field.displayName}</b>
           </label>
           <FieldArray
             name={fieldName}
             render={(fieldArrayProps: any) => {
-              console.log("fieldsssss", field);
+              console.log(
+                "fieldsssss",
+                fieldArrayProps.fields.map((name: any) =>
+                  this.getFields(field.arrayFields, {
+                    name
+                  })
+                )
+              );
               return fieldArrayProps.fields.map((name: any) =>
-                this.getFields(field.arrayFields, field.isLayoutField, {
+                this.getFields(field.arrayFields, {
                   name
                 })
               );
             }}
           />
-          <button
-            type={"button"}
-            className={"btn btn-outline-primary w-20"}
-            onClick={() =>
-              this.formProps.form.mutators.push(fieldName, undefined)
-            }
-          >
-            {field.addText ? field.addText : "Add +"}
-          </button>
-          <button
-            type={"button"}
-            className={"btn btn-outline-danger w-20"}
-            onClick={() =>
-              this.formProps.form.mutators.pop(fieldName, undefined)
-            }
-          >
-            {field.addText ? field.addText : "Delete -"}
-          </button>
+          <div className={"d-flex mb-10 row-12"}>
+            <button
+              type={"button"}
+              className={"btn btn-outline-primary w-20 mr-20"}
+              onClick={() =>
+                this.formProps.form.mutators.push(fieldName, undefined)
+              }
+            >
+              {field.addText ? field.addText : "Add +"}
+            </button>
+            <button
+              type={"button"}
+              className={"btn btn-outline-danger mr-20 w-20"}
+              onClick={() =>
+                this.formProps.form.mutators.pop(fieldName, undefined)
+              }
+            >
+              {field.addText ? field.addText : "Delete -"}
+            </button>
+          </div>
         </div>
       );
     } else {
+      arrayProperties &&
+        console.log(
+          "arrrssss",
+          field,
+          arrayProperties,
+          `${arrayProperties.name}.${fieldName}`
+        );
       return (
         <Field
           name={
@@ -244,46 +258,5 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
         />
       );
     }
-  };
-
-  //To check whether any field property is of type function
-
-  buildCustomStyle = (field: IFields) => {
-    let size: number;
-    let styleObj = {};
-    if (field.hidden) {
-      Object.assign(styleObj, { display: "hidden" });
-    }
-    if (field.size && typeof field.size !== "function") {
-      size = field.size * 10;
-      let minSize = size / 4;
-      if (field.type !== "array") {
-        Object.assign(styleObj, {
-          flex: field.size,
-          maxWidth: `${size}vw`,
-          flexWrap: "wrap"
-          // minWidth: `${minSize}vw`
-        });
-      } else {
-        Object.assign(styleObj, {
-          flex: field.size,
-          maxWidth: `${size}vw`,
-          flexWrap: "wrap",
-          minWidth: `${minSize}vw`,
-          width: `${size}vw`
-        });
-      }
-    } else {
-      size = 100;
-      let minSize = size / 4;
-      Object.assign(styleObj, {
-        flex: size / 10,
-        maxWidth: `${size}vw`,
-        flexWrap: "wrap",
-        minWidth: `${minSize}vw`,
-        width: `${size}vw`
-      });
-    }
-    return styleObj;
   };
 }

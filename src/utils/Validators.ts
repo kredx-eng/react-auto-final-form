@@ -87,7 +87,6 @@ export const getErorr = (
           )
         : undefined;
     } catch (e) {
-      console.log("error", e);
       throw new Error(e);
       return undefined;
     }

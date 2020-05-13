@@ -140,7 +140,6 @@ const organizationDetailPreSanctionEntity = {
       displayName: "CIN/LLPIN*",
       type: "string",
       visible(m: any, r: any, g: any) {
-        console.log("visible cin", m, g);
         return g.organization_info.type == "LIMITED_LIABILITY" ||
           g.organization_info.type == "PRIVATE_LIMITED" ||
           g.organization_info.type == "PUBLIC_LIMITED" ||

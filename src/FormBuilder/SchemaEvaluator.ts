@@ -61,7 +61,6 @@ export class SchemaEvaluator {
   };
 
   private getEntity = (entityName: string) => {
-    console.log("entity", this.schema, entityName);
     const { entities } = this.schema;
     return entities.find((entity: any) => entity.name === entityName);
   };

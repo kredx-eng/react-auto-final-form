@@ -62,14 +62,13 @@ const dateMutator = (args: string, state: any, utils: any) => {
   utils.changeValue(state, args[0], (value: any) => setDate(value));
 };
 
-export class NewFormBuilder extends React.PureComponent<any, any> {
+export class FormBuilder extends React.PureComponent<any, any> {
   formProps: any;
 
   render = () => {
     const { schema, entityName, layoutName, bottomBar, formProps } = this.props;
     const evaluatedSchema = new SchemaEvaluator(schema, entityName, layoutName);
     const { parsedSchema, layoutFields } = evaluatedSchema;
-    console.log("henlo", parsedSchema, layoutFields);
     const isLayoutFields = true;
     return (
       <div className={"container-fluid form-builder"}>
@@ -195,14 +194,6 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
           <FieldArray
             name={fieldName}
             render={(fieldArrayProps: any) => {
-              console.log(
-                "fieldsssss",
-                fieldArrayProps.fields.map((name: any) =>
-                  this.getFields(field.arrayFields, {
-                    name
-                  })
-                )
-              );
               return fieldArrayProps.fields.map((name: any) =>
                 this.getFields(field.arrayFields, {
                   name
@@ -233,13 +224,6 @@ export class NewFormBuilder extends React.PureComponent<any, any> {
         </div>
       );
     } else {
-      arrayProperties &&
-        console.log(
-          "arrrssss",
-          field,
-          arrayProperties,
-          `${arrayProperties.name}.${fieldName}`
-        );
       return (
         <Field
           name={

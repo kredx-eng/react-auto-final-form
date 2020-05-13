@@ -164,7 +164,6 @@ export const createCompanySchema: any = {
             return org_type_accepted;
           },
           displayName(m: any, r: any, g: any) {
-            console.log("called", m.type, r, g);
             if (m.type == "PROPRIETORSHIP") {
               return "Pan No*";
             } else {
@@ -216,7 +215,6 @@ export const createCompanySchema: any = {
           displayName: "CIN*",
           type: "string",
           visible(m: any, r: any, g: any) {
-            console.log("asdf", m, g);
             const org_type_accepted =
               m.type == "PRIVATE_LIMITED" ||
               m.type == "PUBLIC_LIMITED" ||

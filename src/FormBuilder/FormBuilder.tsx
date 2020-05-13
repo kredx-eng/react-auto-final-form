@@ -67,7 +67,9 @@ export class FormBuilder extends React.PureComponent<any, any> {
 
   render = () => {
     const { schema, entityName, layoutName, bottomBar, formProps } = this.props;
+    console.log("schema", schema, entityName);
     const evaluatedSchema = new SchemaEvaluator(schema, entityName, layoutName);
+    console.log("evaluated", evaluatedSchema);
     const { parsedSchema, layoutFields } = evaluatedSchema;
     const isLayoutFields = true;
     return (

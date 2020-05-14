@@ -12,11 +12,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noEmit": true,
-    "jsx": "react",
-    "outDir": "./lib",
-    "declaration": true,
-    "sourceMap": true
+    "jsx": "preserve",
+    "outDir": "./dist",
+    "declaration": true
   },
-  "include": ["./src/*.tsx"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

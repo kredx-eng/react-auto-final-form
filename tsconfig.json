@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "lib": ["dom", "dom.iterable", "esnext", "es2015"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -11,11 +10,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "noEmit": true,
-    "jsx": "preserve",
-    "outDir": "./dist",
-    "declaration": true
+    "noEmit": false,
+    "jsx": "react",
+    "outDir": "./lib",
+    "declaration": true,
+    "sourceMap": true
   },
-  "include": ["src"],
+  "include": ["src", "./index.ts"],
   "exclude": ["node_modules"]
 }

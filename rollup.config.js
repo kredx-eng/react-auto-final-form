@@ -16,7 +16,7 @@ process.env.BABEL_ENV = "production";
 process.env.NODE_ENV = "production";
 
 export default {
-  input: "src/index.tsx",
+  input: "src/index.ts",
   output: { file: "dist/bundle.js", format: "esm" },
   external: [...Object.keys(pkg.peerDependencies || {})],
   plugins: [

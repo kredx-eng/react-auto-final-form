@@ -2,8 +2,8 @@
   "name": "react-auto-final-form",
   "version": "0.1.0",
   "private": true,
-  "main": "./src/index.tsx",
-  "module": "./src/index.tsx",
+  "main": "index.ts",
+  "module": "index.ts",
   "dependencies": {
     "@types/classnames": "^2.2.10",
     "@types/jest": "24.0.16",

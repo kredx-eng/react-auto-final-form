@@ -1,4 +1,4 @@
-import { FormBuilder } from "./FormBuilder/FormBuilder";
+import { FormBuilder } from "./src/FormBuilder/FormBuilder";
 
 export default FormBuilder;
 

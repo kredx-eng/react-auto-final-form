@@ -1,6 +1,5 @@
 import React from "react";
 import { AnyObject } from "./interfaces/SchemaInterfaces";
-import "../components/FormBuilder.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 export declare class FormBuilder extends React.PureComponent<any, any> {
     formProps: any;

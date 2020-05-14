@@ -14,7 +14,6 @@ import {
 } from "react-final-form";
 import { SchemaEvaluator } from "./SchemaEvaluator";
 import isEmpty from "lodash/isEmpty";
-import "../components/FormBuilder.css";
 import { Form, Field } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import { getComponent } from "../utils/GetComponent";

@@ -4,7 +4,6 @@ import {
   SchemaLayout
 } from "../../FormBuilder/interfaces/SchemaInterfaces";
 import { FieldRenderProps } from "react-final-form";
-import "./TextInputField.css";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import classnames from "classnames";

@@ -1,6 +1,5 @@
 import React from "react";
 import { FieldRenderProps } from "react-final-form";
-import "./FormButton.css";
 
 interface IProps {
   onClick: any;

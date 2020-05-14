@@ -7,12 +7,10 @@ declare const DocManagerMultipleUploadsEntity: {
         name: string;
         type: string;
         entityName: string;
-        error?: undefined;
     } | {
         name: string;
         type: string;
         entityName?: undefined;
-        error?: undefined;
     } | {
         name: string;
         type: string;

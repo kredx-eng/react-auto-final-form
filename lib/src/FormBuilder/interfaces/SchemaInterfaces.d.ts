@@ -31,7 +31,7 @@ export interface SchemaEntities extends AnyObject {
     layouts?: LayoutObject | Array<SchemaLayout>;
 }
 export interface SchemaLayout {
-    orientation?: "horizontal" | "vertical" | Function;
+    orientation?: "horizontal" | "vertical";
     fields?: LayoutFields | Array<ILayoutFields>;
     name?: string;
 }

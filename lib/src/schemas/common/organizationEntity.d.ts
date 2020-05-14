@@ -11,7 +11,6 @@ declare const organizationDetailPreSanctionEntity: {
         component?: undefined;
         options?: undefined;
         visible?: undefined;
-        error?: undefined;
         min?: undefined;
         max?: undefined;
         entityName?: undefined;
@@ -27,7 +26,6 @@ declare const organizationDetailPreSanctionEntity: {
         }[];
         help(m: any): "" | "Please select Type of Company";
         visible?: undefined;
-        error?: undefined;
         min?: undefined;
         max?: undefined;
         entityName?: undefined;
@@ -43,7 +41,6 @@ declare const organizationDetailPreSanctionEntity: {
         }[];
         help(m: any): "" | "Please enter Type of Industry";
         visible?: undefined;
-        error?: undefined;
         min?: undefined;
         max?: undefined;
         entityName?: undefined;
@@ -92,7 +89,6 @@ declare const organizationDetailPreSanctionEntity: {
         component?: undefined;
         options?: undefined;
         visible?: undefined;
-        error?: undefined;
         min?: undefined;
         max?: undefined;
         parentClassname?: undefined;
@@ -127,7 +123,6 @@ declare const organizationDetailPreSanctionEntity: {
         visible: boolean;
         component?: undefined;
         options?: undefined;
-        error?: undefined;
         min?: undefined;
         max?: undefined;
         entityName?: undefined;
@@ -170,7 +165,6 @@ declare const organizationDetailPostSanctionEntity: {
         }[];
         help(m: any): "" | "Please select Type of Company";
         visible: boolean;
-        error?: undefined;
     } | {
         name: string;
         displayName: string;

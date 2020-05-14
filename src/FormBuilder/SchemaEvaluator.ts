@@ -206,5 +206,6 @@ export class SchemaEvaluator {
       orientation: layout.orientation
     });
     this.getFields(customEntity, true, false, isArrayField);
+    this.pushAndEmptyFields(layout.orientation);
   };
 }

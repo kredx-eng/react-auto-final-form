@@ -7,7 +7,6 @@ declare const bankInfoEntity: {
         name: string;
         displayName: string;
         type: string;
-        error?: undefined;
     } | {
         name: string;
         displayName: string;

@@ -1,6 +1,7 @@
 import { FormBuilder } from "./src/FormBuilder/FormBuilder";
+import { AutoformComponentFactory } from "./src/FormBuilder/AutoformComponentFactory";
 
-export default FormBuilder;
+export { FormBuilder, AutoformComponentFactory };
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

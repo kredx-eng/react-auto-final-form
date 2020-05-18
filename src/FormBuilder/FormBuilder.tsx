@@ -100,17 +100,13 @@ export class FormBuilder extends React.PureComponent<any, any> {
       return parsedSchema.map(layout => {
         return (
           <div
-            className={classNames(
-              layout.orientation === "vertical"
-                ? "verticalLayout"
-                : "horizontalLayout"
-            )}
             // @ts-ignore
-            style={
-              layout.orientation === "vertical"
-                ? styles.verticalLayout
-                : styles.horizontalLayout
-            }
+            // style={
+            //   layout.orientation === "vertical"
+            //     ? styles.verticalLayout
+            //     : styles.horizontalLayout
+            // }
+            className={layout.orientation === "vertical" ? "col" : "form-row"}
           >
             {Object.keys(layout.fields).map(fieldName =>
               // @ts-ignore
@@ -129,15 +125,13 @@ export class FormBuilder extends React.PureComponent<any, any> {
       const modfifiedArraySchema = omit(parsedSchema, ["orientation"]);
       return (
         <div
-          className={
-            orientation === "vertical" ? "verticalLayout" : "horizontalLayout"
-          }
           // @ts-ignore
-          style={
-            orientation === "vertical"
-              ? styles.verticalLayout
-              : styles.horizontalLayout
-          }
+          // style={
+          //   orientation === "vertical"
+          //     ? styles.verticalLayout
+          //     : styles.horizontalLayout
+          // }
+          className={orientation === "vertical" ? "col" : "form-row"}
         >
           {Object.keys(modfifiedArraySchema).map(fieldName => {
             return this.renderField(

@@ -7,6 +7,7 @@ export declare const addressEntity: {
         name: string;
         displayName: string;
         type: string;
+        error?: undefined;
         component?: undefined;
         options?: undefined;
         min?: undefined;
@@ -35,6 +36,7 @@ export declare const addressEntity: {
             value: string;
             text: string;
         }[];
+        error?: undefined;
         min?: undefined;
         max?: undefined;
         entityName?: undefined;
@@ -59,6 +61,7 @@ export declare const addressEntity: {
         entityName: string;
         className: string;
         layoutName: string;
+        error?: undefined;
         component?: undefined;
         options?: undefined;
         min?: undefined;

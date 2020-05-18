@@ -16,6 +16,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["src", "./index.ts"],
+  "include": ["src", "./index.ts", "./src/FormBuilder/FormBuilder.css"],
   "exclude": ["node_modules"]
 }

@@ -23,6 +23,7 @@ import { FormHelper } from "../utils/FormHelper";
 import { FieldArray } from "react-final-form-arrays";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classNames from "classnames";
+import styles from "./FormBuilderStyles";
 
 interface IProps {
   schema: Schema;
@@ -100,8 +101,16 @@ export class FormBuilder extends React.PureComponent<any, any> {
         return (
           <div
             className={classNames(
-              layout.orientation === "vertical" ? "col" : "row"
+              layout.orientation === "vertical"
+                ? "verticalLayout"
+                : "horizontalLayout"
             )}
+            // @ts-ignore
+            style={
+              layout.orientation === "vertical"
+                ? styles.verticalLayout
+                : styles.horizontalLayout
+            }
           >
             {Object.keys(layout.fields).map(fieldName =>
               // @ts-ignore
@@ -122,6 +131,12 @@ export class FormBuilder extends React.PureComponent<any, any> {
         <div
           className={
             orientation === "vertical" ? "verticalLayout" : "horizontalLayout"
+          }
+          // @ts-ignore
+          style={
+            orientation === "vertical"
+              ? styles.verticalLayout
+              : styles.horizontalLayout
           }
         >
           {Object.keys(modfifiedArraySchema).map(fieldName => {

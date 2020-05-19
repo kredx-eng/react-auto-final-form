@@ -4,8 +4,6 @@ import {
   SchemaLayout
 } from "../../FormBuilder/interfaces/SchemaInterfaces";
 import { FieldRenderProps } from "react-final-form";
-import Form from "react-bootstrap/Form";
-import Row from "react-bootstrap/Row";
 import classnames from "classnames";
 
 interface IProps {
@@ -28,7 +26,8 @@ const TextInputField = (props: any) => {
             props.visible === undefined ||
             typeof props.visible === "function"
         },
-        "row-12 justify-content-between mb-3 w-auto h-10"
+        "col-md-6 justify-content-between mb-3 w-auto h-10",
+        { "has-error": meta.invalid && meta.touched }
       )}
     >
       <label>{props.displayName}</label>
@@ -42,7 +41,7 @@ const TextInputField = (props: any) => {
           className={classnames(
             "rounded form-control",
             {
-              "is-invalid": !meta.valid
+              "is-invalid": meta.invalid && meta.touched
             },
             { disabled: props.disabled },
             { "d-none": props.visible === false }
@@ -50,7 +49,7 @@ const TextInputField = (props: any) => {
           value={input.value}
         />
         {meta.error && meta.touched && (
-          <p>
+          <p style={{ color: "red" }}>
             {Array.isArray(meta.error)
               ? meta.error[meta.error.length - 1]
               : meta.error}

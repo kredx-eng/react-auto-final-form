@@ -1,4 +1,5 @@
 import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 export declare const FieldWrapper: (WrappedComponent: React.ElementType<any>) => {
     new (props: Readonly<any>): {
         render(): JSX.Element;

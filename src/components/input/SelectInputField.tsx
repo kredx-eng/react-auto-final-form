@@ -1,12 +1,11 @@
 import React from "react";
-import { Form } from "react-bootstrap";
 import classNames from "classnames";
 
 const SelectInputField = (props: any) => {
   const { input, meta } = props;
   return (
-    <div className={"d-flex row-12 justify-content-between mb-3 "}>
-      <Form.Label>{props.displayName}</Form.Label>
+    <div className={"d-flex col-md-6 justify-content-between mb-3 "}>
+      <label>{props.displayName}</label>
       <select
         name={props.displayName}
         onChange={props.input.onChange}

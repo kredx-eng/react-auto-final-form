@@ -1,13 +1,17 @@
 import React from "react";
 import classNames from "classnames";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export const FieldWrapper = (WrappedComponent: React.ElementType) => {
   return class extends React.PureComponent<any, any> {
     render() {
       const { size, input, meta, displayName, disabled, visible } = this.props;
+      const colSize = size ? `col-md-${size}` : `col-md-12`;
       return (
         <div
-          className={classNames("form-group", `col${size ? `-${size}` : ""}`)}
+          className={classNames("form-group", colSize, {
+            "has-error": meta.invalid && meta.touched
+          })}
         >
           <div className={"row"}>
             <label>{displayName}</label>
@@ -16,7 +20,7 @@ export const FieldWrapper = (WrappedComponent: React.ElementType) => {
               className={classNames(
                 "form-control",
                 {
-                  "is-invalid": meta.invalid
+                  "is-invalid": meta.invalid && meta.touched
                 },
                 { disabled: disabled },
                 { "d-none": visible === false }
@@ -24,7 +28,9 @@ export const FieldWrapper = (WrappedComponent: React.ElementType) => {
               id={input.name}
             />
           </div>
-          <div className={"invalid-feedback"}>{meta.error}</div>
+          {meta.invalid && meta.error && (
+            <p style={{ color: "red" }}>{meta.error}</p>
+          )}
         </div>
       );
     }

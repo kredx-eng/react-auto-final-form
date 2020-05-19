@@ -2,9 +2,9 @@ import React from "react";
 import { FieldRenderProps } from "react-final-form";
 
 interface IProps {
-  onClick: any;
-  field: any;
-  fieldProps: FieldRenderProps<any, any>;
+  onClick?: any;
+  field?: any;
+  fieldProps?: FieldRenderProps<any, any>;
 }
 
 const Button = (props: any) => {

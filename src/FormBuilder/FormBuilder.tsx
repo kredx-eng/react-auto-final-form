@@ -24,6 +24,7 @@ import { FieldArray } from "react-final-form-arrays";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classNames from "classnames";
 import styles from "./FormBuilderStyles";
+import Button from "../components/input/FormButton";
 
 interface IProps {
   schema: Schema;
@@ -70,8 +71,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
     console.log("schema", schema, entityName);
     const evaluatedSchema = new SchemaEvaluator(schema, entityName, layoutName);
     console.log("evaluated", evaluatedSchema, formProps, entityName);
-    const { parsedSchema, layoutFields } = evaluatedSchema;
-    const isLayoutFields = true;
+    const { parsedSchema } = evaluatedSchema;
     return (
       <div className={"container-fluid form-builder"}>
         <Form
@@ -86,6 +86,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
                   name={"bottomBar"}
                   component={this.props.bottomBar}
                   key={"bottomBar"}
+                  onSubmit={formProps.handleSubmit}
                 />
               </form>
             );
@@ -100,13 +101,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
       return parsedSchema.map(layout => {
         return (
           <div
-            // @ts-ignore
-            // style={
-            //   layout.orientation === "vertical"
-            //     ? styles.verticalLayout
-            //     : styles.horizontalLayout
-            // }
-            className={layout.orientation === "vertical" ? "col" : "form-row"}
+            className={layout.orientation === "vertical" ? "col-md-12" : "row"}
           >
             {Object.keys(layout.fields).map(fieldName =>
               // @ts-ignore
@@ -124,15 +119,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
       const { orientation } = parsedSchema;
       const modfifiedArraySchema = omit(parsedSchema, ["orientation"]);
       return (
-        <div
-          // @ts-ignore
-          // style={
-          //   orientation === "vertical"
-          //     ? styles.verticalLayout
-          //     : styles.horizontalLayout
-          // }
-          className={orientation === "vertical" ? "col" : "form-row"}
-        >
+        <div className={orientation === "vertical" ? "col-md-12" : "row"}>
           {Object.keys(modfifiedArraySchema).map(fieldName => {
             return this.renderField(
               modfifiedArraySchema[fieldName],

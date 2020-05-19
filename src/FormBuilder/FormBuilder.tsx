@@ -73,17 +73,14 @@ export class FormBuilder extends React.PureComponent<any, any> {
     console.log("evaluated", evaluatedSchema, formProps, entityName);
     const { parsedSchema } = evaluatedSchema;
     return (
-      <div className={"container-fluid form-builder"}>
+      <div className={"container-fluid"}>
         <Form
           {...formProps}
           mutators={{ ...arrayMutators, date: dateMutator }}
           render={formProps => {
             this.formProps = formProps;
             return (
-              <form
-                onSubmit={formProps.handleSubmit}
-                className={"form-horizontal"}
-              >
+              <form onSubmit={formProps.handleSubmit}>
                 {this.getFields(parsedSchema)}
                 <Field
                   name={"bottomBar"}

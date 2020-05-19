@@ -12,6 +12,7 @@ export const FieldWrapper = (WrappedComponent: React.ElementType) => {
           className={classNames("form-group", colSize, {
             "has-error": meta.invalid && meta.touched
           })}
+          style={{ padding: 20 }}
         >
           <div className={"row"}>
             <label>{displayName}</label>
@@ -23,14 +24,19 @@ export const FieldWrapper = (WrappedComponent: React.ElementType) => {
                   "is-invalid": meta.invalid && meta.touched
                 },
                 { disabled: disabled },
-                { "d-none": visible === false }
+                { "hidden-md hidden-lg hidden-sm hidden-xs": visible === false }
               )}
               id={input.name}
             />
           </div>
-          {meta.invalid && meta.error && (
-            <p style={{ color: "red" }}>{meta.error}</p>
-          )}
+          <span
+            style={{ color: "red", paddingTop: 10 }}
+            className={classNames({
+              invisible: !meta.invalid && meta.touched
+            })}
+          >
+            {meta.error}
+          </span>
         </div>
       );
     }

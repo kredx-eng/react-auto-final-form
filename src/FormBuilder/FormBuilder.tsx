@@ -80,7 +80,10 @@ export class FormBuilder extends React.PureComponent<any, any> {
           render={formProps => {
             this.formProps = formProps;
             return (
-              <form onSubmit={formProps.handleSubmit}>
+              <form
+                onSubmit={formProps.handleSubmit}
+                className={"form-horizontal"}
+              >
                 {this.getFields(parsedSchema)}
                 <Field
                   name={"bottomBar"}

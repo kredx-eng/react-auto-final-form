@@ -12,31 +12,33 @@ export const FieldWrapper = (WrappedComponent: React.ElementType) => {
           className={classNames("form-group", colSize, {
             "has-error": meta.invalid && meta.touched
           })}
-          style={{ padding: 20 }}
+          style={{ paddingBottom: 10, paddingTop: 10 }}
         >
-          <div className={"row"}>
-            <label>{displayName}</label>
-            <WrappedComponent
-              {...this.props}
-              className={classNames(
-                "form-control",
-                {
-                  "is-invalid": meta.invalid && meta.touched
-                },
-                { disabled: disabled },
-                { "hidden-md hidden-lg hidden-sm hidden-xs": visible === false }
-              )}
-              id={input.name}
-            />
-          </div>
-          <span
-            style={{ color: "red", paddingTop: 10 }}
-            className={classNames({
-              invisible: !meta.invalid && meta.touched
-            })}
+          <label>{displayName}</label>
+          <WrappedComponent
+            {...this.props}
+            className={classNames(
+              "form-control",
+              {
+                "is-invalid": meta.invalid && meta.touched
+              },
+              { disabled: disabled },
+              { "hidden-md hidden-lg hidden-sm hidden-xs": visible === false }
+            )}
+            id={input.name}
+          />
+          <div
+            style={{ color: "red" }}
+            className={classNames(
+              "help-block",
+              {
+                invisible: !meta.touched && !meta.active
+              },
+              { visible: meta.invalid && (meta.touched || meta.active) }
+            )}
           >
             {meta.error}
-          </span>
+          </div>
         </div>
       );
     }

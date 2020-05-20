@@ -9,7 +9,7 @@ export declare class SchemaEvaluator {
     private arrayField;
     constructor(schema: any, initialEntityName: string, layoutName?: string);
     private parseEntity;
-    pushAndEmptyFields: (orientation?: "vertical" | "horizontal" | undefined) => void;
+    pushAndEmptyFields: (orientation?: "horizontal" | "vertical" | undefined) => void;
     private getEntity;
     private getFields;
     private getArrayFields;

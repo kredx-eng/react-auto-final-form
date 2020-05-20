@@ -51,7 +51,6 @@ export declare const prefetchDealSchema: {
                     required: boolean;
                     size: number;
                     defaultValue?: undefined;
-                    error?: undefined;
                 })[];
             }[];
         }[];

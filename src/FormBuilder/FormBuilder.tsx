@@ -68,9 +68,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
 
   render = () => {
     const { schema, entityName, layoutName, bottomBar, formProps } = this.props;
-    console.log("schema", schema, entityName);
     const evaluatedSchema = new SchemaEvaluator(schema, entityName, layoutName);
-    console.log("evaluated", evaluatedSchema, formProps, entityName);
     const { parsedSchema } = evaluatedSchema;
     return (
       <div className={"container-fluid"}>
@@ -84,7 +82,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
                 {this.getFields(parsedSchema)}
                 <Field
                   name={"bottomBar"}
-                  component={this.props.bottomBar}
+                  component={bottomBar}
                   key={"bottomBar"}
                   onSubmit={formProps.handleSubmit}
                 />

@@ -1,27 +1,21 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "es2015"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "declarationDir": "./dist",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "noEmit": true,
-    "jsx": "preserve",
-    "outDir": "./dist"
+    "noEmit": false,
+    "jsx": "react",
+    "outDir": "./lib",
+    "declaration": true,
+    "sourceMap": true
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src", "./index.ts", "./src/FormBuilder/FormBuilder.css"],
   "exclude": ["node_modules"]
 }

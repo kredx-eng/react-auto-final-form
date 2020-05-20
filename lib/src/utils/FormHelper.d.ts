@@ -4,7 +4,7 @@ export declare const FormHelper: {
     evaluator: (evaluatee: Function, formState: any) => any;
     formState: any;
     updateFormState: (formProps: any) => void;
-    metaDataEvaluator: (field: SchemaFields, formSpyProps: FormSpyRenderProps<import("react-final-form").AnyObject>, fieldName: string) => SchemaFields;
+    metaDataEvaluator: (field: SchemaFields, formSpyProps: FormSpyRenderProps, fieldName: string) => SchemaFields;
     getFieldState: (fieldName: string) => "WHEEEWWWW" | "nope";
     getLocalModel: (fieldName: string, model: AnyObject) => any;
     fieldPropertyCheck: (field: any) => boolean;

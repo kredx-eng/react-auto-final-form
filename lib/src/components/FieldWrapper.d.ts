@@ -1,6 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-export declare const FieldWrapper: (WrappedComponent: React.ElementType<any>) => {
+export declare const FieldWrapper: (WrappedComponent: React.ElementType) => {
     new (props: Readonly<any>): {
         render(): JSX.Element;
         context: any;
@@ -13,6 +13,18 @@ export declare const FieldWrapper: (WrappedComponent: React.ElementType<any>) =>
         refs: {
             [key: string]: React.ReactInstance;
         };
+        componentDidMount?(): void;
+        shouldComponentUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): boolean;
+        componentWillUnmount?(): void;
+        componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
+        getSnapshotBeforeUpdate?(prevProps: Readonly<any>, prevState: Readonly<any>): any;
+        componentDidUpdate?(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void;
+        componentWillMount?(): void;
+        UNSAFE_componentWillMount?(): void;
+        componentWillReceiveProps?(nextProps: Readonly<any>, nextContext: any): void;
+        UNSAFE_componentWillReceiveProps?(nextProps: Readonly<any>, nextContext: any): void;
+        componentWillUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): void;
+        UNSAFE_componentWillUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): void;
     };
     new (props: any, context?: any): {
         render(): JSX.Element;
@@ -26,6 +38,18 @@ export declare const FieldWrapper: (WrappedComponent: React.ElementType<any>) =>
         refs: {
             [key: string]: React.ReactInstance;
         };
+        componentDidMount?(): void;
+        shouldComponentUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): boolean;
+        componentWillUnmount?(): void;
+        componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
+        getSnapshotBeforeUpdate?(prevProps: Readonly<any>, prevState: Readonly<any>): any;
+        componentDidUpdate?(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void;
+        componentWillMount?(): void;
+        UNSAFE_componentWillMount?(): void;
+        componentWillReceiveProps?(nextProps: Readonly<any>, nextContext: any): void;
+        UNSAFE_componentWillReceiveProps?(nextProps: Readonly<any>, nextContext: any): void;
+        componentWillUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): void;
+        UNSAFE_componentWillUpdate?(nextProps: Readonly<any>, nextState: Readonly<any>, nextContext: any): void;
     };
     contextType?: React.Context<any> | undefined;
 };

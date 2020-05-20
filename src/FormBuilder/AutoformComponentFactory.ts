@@ -3,7 +3,10 @@ import React from "react";
 import { FieldWrapper } from "../components/FieldWrapper";
 
 export class AutoformComponentFactory {
-  componentFactory: AnyObject = {};
+  componentFactory: AnyObject;
+  constructor() {
+    this.componentFactory = {};
+  }
   registerFieldComponent = (
     name: string,
     type: Array<any> | string,

@@ -80,12 +80,7 @@ export class FormBuilder extends React.PureComponent<any, any> {
             return (
               <form onSubmit={formProps.handleSubmit}>
                 {this.getFields(parsedSchema)}
-                <Field
-                  name={"bottomBar"}
-                  component={bottomBar}
-                  key={"bottomBar"}
-                  onSubmit={formProps.handleSubmit}
-                />
+                <FormSpy component={bottomBar} key={"bottomBar"} />
               </form>
             );
           }}

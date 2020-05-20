@@ -19,7 +19,7 @@
     "babel-loader": "8.0.5",
     "babel-plugin-named-asset-import": "^0.3.2",
     "babel-preset-react-app": "^9.0.0",
-    "bootstrap": "3.3.7",
+    "bootstrap": "^3.4.1",
     "camelcase": "^5.2.0",
     "case-sensitive-paths-webpack-plugin": "2.2.0",
     "classnames": "^2.2.6",
@@ -142,7 +142,7 @@
     "url": "https://github.com/kredx-eng/react-auto-final-form"
   },
   "peerDependencies": {
-    "bootstrap": "3.3.7",
+    "bootstrap": "^3.4.1",
     "final-form": "^4.18.2",
     "final-form-arrays": "^3.0.1",
     "final-form-calculate": "^1.3.1",

@@ -44,7 +44,12 @@ export class SchemaEvaluator {
       );
     } else {
       if (layoutName && requiredEntity.layouts) {
-        this.getLayoutFields(requiredEntity, layoutName);
+        this.getLayoutFields(
+          requiredEntity,
+          layoutName,
+          false,
+          isInitialEntity
+        );
       } else if (requiredEntity.fields) {
         this.getFields(requiredEntity, false, isInitialEntity);
         this.pushAndEmptyFields();
@@ -162,7 +167,8 @@ export class SchemaEvaluator {
   private getLayoutFields = (
     entity: SchemaEntities,
     layoutName: string,
-    isArrayField?: boolean
+    isArrayField?: boolean,
+    isInitialEntity?: boolean
   ) => {
     const requiredLayout =
       entity.layouts &&
@@ -175,10 +181,20 @@ export class SchemaEvaluator {
     } else {
       if (requiredLayout.groups) {
         requiredLayout.groups.forEach((group: Groups) => {
-          this.generateLayoutFields(group, entity, isArrayField);
+          this.generateLayoutFields(
+            group,
+            entity,
+            isArrayField,
+            isInitialEntity
+          );
         });
       } else {
-        this.generateLayoutFields(requiredLayout, entity, isArrayField);
+        this.generateLayoutFields(
+          requiredLayout,
+          entity,
+          isArrayField,
+          isInitialEntity
+        );
       }
     }
   };
@@ -186,7 +202,8 @@ export class SchemaEvaluator {
   private generateLayoutFields = (
     layout: SchemaLayout | Groups,
     entity: SchemaEntities,
-    isArrayField?: boolean
+    isArrayField?: boolean,
+    isInitialEntity?: boolean
   ) => {
     let mergedFields: Array<any> = [];
     // @ts-ignore
@@ -205,7 +222,7 @@ export class SchemaEvaluator {
       fields: mergedFields,
       orientation: layout.orientation
     });
-    this.getFields(customEntity, true, false, isArrayField);
+    this.getFields(customEntity, true, isInitialEntity, isArrayField);
     this.pushAndEmptyFields(layout.orientation);
   };
 }

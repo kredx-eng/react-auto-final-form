@@ -200,26 +200,6 @@ export class FormBuilder extends React.PureComponent<any, any> {
               </ArrayContainer>
             )}
           />
-          <div className={"d-flex mb-10 row-12"}>
-            <button
-              type={"button"}
-              className={"btn btn-outline-primary w-20 mr-20"}
-              onClick={() =>
-                this.formProps.form.mutators.push(fieldName, undefined)
-              }
-            >
-              {field.addText ? field.addText : "Add +"}
-            </button>
-            <button
-              type={"button"}
-              className={"btn btn-outline-danger mr-20 w-20"}
-              onClick={() =>
-                this.formProps.form.mutators.pop(fieldName, undefined)
-              }
-            >
-              {field.addText ? field.addText : "Delete -"}
-            </button>
-          </div>
         </div>
       );
     } else {

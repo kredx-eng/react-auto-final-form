@@ -10,6 +10,7 @@ interface ArrayContainerProps extends React.ComponentProps<any> {
 export declare class ArrayContainer extends React.PureComponent<ArrayContainerProps, any> {
     addField: () => void;
     deleteField: () => void;
+    defaultButtonBar: () => JSX.Element;
     render: () => JSX.Element;
 }
 export {};

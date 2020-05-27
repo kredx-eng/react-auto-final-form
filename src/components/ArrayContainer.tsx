@@ -21,8 +21,32 @@ export class ArrayContainer extends React.PureComponent<
     const { deleteField, name } = this.props;
     deleteField(name);
   };
+  defaultButtonBar = () => (
+    <div className={"d-flex mb-10 row-12"}>
+      <button
+        type={"button"}
+        className={"btn btn-outline-primary w-20 mr-20"}
+        onClick={this.addField}
+      >
+        {"Add +"}
+      </button>
+      <button
+        type={"button"}
+        className={"btn btn-outline-danger mr-20 w-20"}
+        onClick={this.deleteField}
+      >
+        {"Delete -"}
+      </button>
+    </div>
+  );
+
   render = () => {
-    const { children } = this.props;
-    return <>{children}</>;
+    const { children, buttonBar } = this.props;
+    return (
+      <div>
+        {children}
+        {buttonBar ? buttonBar : this.defaultButtonBar()}
+      </div>
+    );
   };
 }

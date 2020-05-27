@@ -3,5 +3,3 @@ export declare const COMPONENT_FACTORY: {
     button: (props: any) => JSX.Element;
     Select: (props: any) => JSX.Element;
 };
-declare const _default: void;
-export default _default;

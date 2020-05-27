@@ -1,16 +1,28 @@
 import React from "react";
+import { AnyObject } from "../FormBuilder/interfaces/SchemaInterfaces";
 
-export class ArrayContainer extends React.PureComponent<any, any> {
+interface ArrayContainerProps extends React.ComponentProps<any> {
+  addField: Function;
+  deleteField: Function;
+  name: string;
+  arrayProps: AnyObject;
+  buttonBar?: React.ElementType;
+}
+
+export class ArrayContainer extends React.PureComponent<
+  ArrayContainerProps,
+  any
+> {
   addField = () => {
-    const { addField, arrayName } = this.props;
-    addField(arrayName);
+    const { addField, name } = this.props;
+    addField(name);
   };
   deleteField = () => {
-    const { deleteField, arrayName } = this.props;
-    deleteField(arrayName);
+    const { deleteField, name } = this.props;
+    deleteField(name);
   };
   render = () => {
     const { children } = this.props;
-    return <div>{children}</div>;
+    return <>{children}</>;
   };
 }

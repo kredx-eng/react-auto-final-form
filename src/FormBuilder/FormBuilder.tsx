@@ -25,6 +25,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import classNames from "classnames";
 import styles from "./FormBuilderStyles";
 import Button from "../components/input/FormButton";
+import { ArrayContainer } from "../components/ArrayContainer";
 
 interface IProps {
   schema: Schema;
@@ -184,13 +185,20 @@ export class FormBuilder extends React.PureComponent<any, any> {
           </label>
           <FieldArray
             name={fieldName}
-            render={(fieldArrayProps: any) => {
-              return fieldArrayProps.fields.map((name: any) =>
-                this.getFields(field.arrayFields, {
-                  name
-                })
-              );
-            }}
+            render={(fieldArrayProps: any) => (
+              <ArrayContainer
+                addField={this.formProps.form.mutators.push}
+                name={fieldName}
+                deleteField={this.formProps.form.mutators.pop}
+                arrayProps={fieldArrayProps}
+              >
+                {fieldArrayProps.fields.map((name: any) =>
+                  this.getFields(field.arrayFields, {
+                    name
+                  })
+                )}
+              </ArrayContainer>
+            )}
           />
           <div className={"d-flex mb-10 row-12"}>
             <button

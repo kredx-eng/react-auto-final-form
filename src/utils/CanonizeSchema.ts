@@ -9,7 +9,14 @@ export const canonizeSchema = (schema: AnyObject): AnyObject => {
   } else if (!Array.isArray(schema.entities)) {
     canonizedSchema.entities = [];
     Object.keys(schema.entities).forEach(entityName => {
-      const canonizedEntity = canonizeFields(schema.entities[entityName]);
+      let canonizedEntity = Object.assign(
+        {},
+        canonizeItems(schema.entities[entityName])
+      );
+      Object.assign(
+        canonizedEntity,
+        canonizeLayouts(canonizedEntity, "layouts")
+      );
       canonizedSchema.entities.push(
         Object.assign({}, { ...canonizedEntity, name: entityName })
       );
@@ -18,28 +25,75 @@ export const canonizeSchema = (schema: AnyObject): AnyObject => {
   } else {
     canonizedSchema.entities = [];
     schema.entities.forEach((entity: AnyObject) => {
-      const canonizedEntity = canonizeFields(entity);
+      let canonizedEntity = Object.assign({}, canonizeItems(entity));
+      Object.assign(
+        canonizedEntity,
+        canonizeLayouts(canonizedEntity, "layouts")
+      );
       canonizedSchema.entities.push(Object.assign({}, { ...canonizedEntity }));
     });
+    console.log("canonizedSchema", canonizedSchema);
     return canonizedSchema;
   }
 };
 
-const canonizeFields = (entity: AnyObject) => {
-  let canonizedEntity = omit(entity, ["fields"]);
+const canonizeLayouts = (entity: AnyObject, type: "layouts" | "groups") => {
+  if (entity[type]) {
+    let canonizedEntity = omit(entity, [type]);
+    if (Array.isArray(entity[type])) {
+      if (type === "layouts" && entity.layouts[0].groups) {
+        Object.assign(
+          canonizedEntity[type],
+          canonizeLayouts(entity.layouts, "groups")
+        );
+      } else {
+        Object.assign(canonizedEntity[type], canonizeItems(entity[type]));
+      }
+    } else {
+      canonizedEntity[type] = Object.keys(entity[type]).map(name => {
+        if (entity[type][name].fields) {
+          console.log("here", name);
+          return canonizeLayouts(
+            Object.assign(
+              {},
+              {
+                ...canonizeItems(entity[type][name]),
+                name: name
+              }
+            ),
+            "groups"
+          );
+        } else {
+          return canonizeLayouts(
+            Object.assign({}, { ...entity[type][name], name: name }),
+            "groups"
+          );
+        }
+      });
+    }
+    return canonizedEntity;
+  } else {
+    return entity;
+  }
+};
+
+const canonizeItems = (entity: AnyObject) => {
+  const canonizedEntity = omit(entity, ["fields"]);
+  console.log("heenya", omit(entity, ["fields"]));
   if (entity.fields) {
     if (Array.isArray(entity.fields)) {
       return entity;
     } else {
-      canonizedEntity.fields = [];
-      Object.keys(entity.fields).forEach(fieldName => {
-        canonizedEntity.fields.push(
-          Object.assign({}, { ...entity.fields[fieldName], name: fieldName })
+      canonizedEntity.fields = Object.keys(entity.fields).map(fieldName => {
+        return Object.assign(
+          {},
+          { ...entity.fields[fieldName], name: fieldName }
         );
       });
+      console.log("fields", canonizedEntity);
       return canonizedEntity;
     }
   } else {
-    throw Error("The provided entity doesn't contain a name");
+    return entity;
   }
 };

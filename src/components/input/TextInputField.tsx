@@ -13,7 +13,7 @@ interface IProps {
 }
 
 const TextInputField = (props: any) => {
-  const { input, meta } = props;
+  const { input, meta, size } = props;
   return (
     <div
       className={classnames(
@@ -26,7 +26,7 @@ const TextInputField = (props: any) => {
             props.visible === undefined ||
             typeof props.visible === "function"
         },
-        "col-md-6 justify-content-between mb-3 w-auto h-10",
+        `col-md-${size || 6} justify-content-between mb-3 w-auto h-10`,
         { "has-error": meta.invalid && meta.touched }
       )}
     >
